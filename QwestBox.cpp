@@ -1,47 +1,27 @@
-// Do not remove the include below
+
 #include "QwestBox.h"
-
-
-
-//#include <Wire.h>
 #include "LiquidCrystal_I2C.h"
-//#include <avr/sleep.h>
-//#include <MsTimer2.h>
-//#include <TimerOne.h>
-//#include <EEPROM.h>
-//#include <nmea.h>
 #include "TinyGPS++.h"
-//#include <TinyGPS++.h>
-
-
 #include <SoftwareSerial.h>
-//#include <LiquidCrystal.h>
-//#include <TinyGPS.h>
 #include <Servo.h>
-#include <Servo/src/Servo.h>
 
-//#include <DigitalToggle.h>
-//#include </home/vid/Programs/arduino-1.6.4/libraries/DigitalToggle/DigitalToggle.h>
-//#include
+#define TARGET_1_LAT 46.080686
+#define TARGET_1_LON 14.550043
 
 #define LCD_BACKLIGHT_TIME 3000
 #define LCD_POWER_PIN      3
 #define ON_PIN             8
+#define LED_PIN            13
 #define BUTTON_PIN         2
 #define SLEEP_TIME_MS      600000
 #define BUTTON1_DELAY      1000
 #define DOOR_CLOSED        110
 #define DOOR_OPEN          50
 #define SERVO_PIN          9
+#define SERVO_ON_PIN       6
+#define BATTERY_VOLTAGE_PIN A1
+#define BATTERY_AVAREGE_COUNT 20
 
-#define _useTimer1
-
-/* This sample code demonstrates the normal use of a TinyGPS object.
-   It requires the use of SoftwareSerial, and assumes that you have a
-   4800-baud serial GPS device hooked up on pins 4(rx) and 3(tx).
-*/
-
-//NMEA gps(ALL);
 TinyGPSPlus gps;
 //LiquidCrystal lcd(8, 10, 4, 5, 6, 7);
 LiquidCrystal_I2C lcd(0x27,16,2);
@@ -53,12 +33,12 @@ void digitalToggle(int P);
 int distance2();
 void open_box();
 void go_sleep(void);
+float get_battery_voltage_avg(float bat_read);
 
 unsigned long lcd_time;
-unsigned long time = 0;
+unsigned long update_time = 0;
 unsigned long sleep_time = 0;
-double lat, lon;
-double lat2, lon2;
+double position_lat, position_lon;
 double d, distance;
 int sats_view, sats_fix, gps_fix;
 long hdop;
@@ -68,181 +48,149 @@ unsigned short sentences, failed;
 int but;
 int test = 0;
 bool interrupt_flag = 0;
-
+float bat_voltage;
 
 
 void setup()
 {
-//46.080686, 14.550043
+    // Init pin outputs
+    pinMode(BATTERY_VOLTAGE_PIN, INPUT);
+    pinMode(BUTTON_PIN, INPUT);
+    pinMode(LED_PIN, OUTPUT);
+    pinMode(SERVO_ON_PIN, OUTPUT);
+    pinMode(ON_PIN, INPUT);
+    pinMode(LCD_POWER_PIN, OUTPUT);
 
-  lat2 = 46.080686;
-  lon2 = 14.550043;
 
+    // LCD power ON
+    digitalWrite(LCD_POWER_PIN, 1);
 
-  pinMode(2, INPUT);
-  pinMode(13, OUTPUT);
-  //pinMode(4, INPUT);
-  //pinMode(5, OUTPUT);
-  pinMode(ON_PIN, OUTPUT);
-  pinMode(LCD_POWER_PIN, OUTPUT);
-  servo.attach(SERVO_PIN);
+    ss.begin(9600);
 
-  digitalWrite(ON_PIN, 1);
-  digitalWrite(LCD_POWER_PIN, 1);
- // MsTimer2::set(1000, go_test);
-  //Serial.println(MsTimer2::count);
-  //MsTimer2::start();
-  //Serial.println(MsTimer2::count);
-  //interrupts();
-  //Timer1.initialize(100000);
-  //Timer1.attachInterrupt(go_sleep);
+    Serial.begin(115200);
+    Serial.println("QuestBox");
 
-  Serial.begin(115200);
+    lcd.init();
+    lcd.backlight();
+    lcd.print("   Quest Box  ");
 
-      // delay(10000);
-  Serial.println("QuestBox");
-  Serial.println();
+    //servo.write(DOOR_CLOSED);
 
-  lcd.init();
-  lcd.backlight();
-  lcd.print("   Quest Box  ");
-  //lcd.begin(16, 2);
+    digitalWrite(SERVO_ON_PIN, 0);
 
-  servo.write(90);
-  delay(200);
-  servo.write(DOOR_CLOSED);
-  delay(1500);
-  servo.detach();
-  ss.begin(9600);
+    // Init battery voltage
+    for(int i = 0; i < BATTERY_AVAREGE_COUNT; i++) get_battery_voltage_avg(analogRead(BATTERY_VOLTAGE_PIN));
+    bat_voltage = get_battery_voltage_avg(analogRead(BATTERY_VOLTAGE_PIN));
+    float bat_percent = (bat_voltage - 3.3)*111.1;
 
-  Serial.println("Setup done.");
+    lcd.setCursor(0,1);
+    lcd.print("Battery: ");
+    lcd.print((int)bat_percent);
+    lcd.print("%");
+    delay(3000);
+
+    Serial.println("Setup done.");
 }
 
 void loop()
 {
-  //Serial.println("Loop started.");
-
-  but= digitalRead(BUTTON_PIN);
-  if(!but){
-    secret_button();
-  }
-
-//
-//
-//
-//    digitalWrite(13, 1);
-//
-//    //servo.write(DOOR_OPEN);
-//    lcd.init();
-//    lcd.backlight();
-//    lcd.clear();
-//    lcd.print("   Quest Box  ");
-//    lcd_time = millis();
-//    sleep_time = millis();
-//    delay(3000);
-//
-//
-//
-//    while(but){but = digitalRead(BUTTON_PIN); delay(30);}
-
-
-//  else{
-//    //digitalWrite(13, 0);
-//    //lcd.noBacklight();
-//    servo.write(DOOR_CLOSED);
-//  }
-
-  //if(ss.available())
-   // get_gps();
-
-   while (ss.available() > 0)
-      gps.encode(ss.read());
-
-      sats_fix = gps.satellites.value();
-      hdop = gps.hdop.value();
-      distance = gps.distanceBetween(lat, lon, lat2, lon2);
-      lat = gps.location.lat();
-      lon = gps.location.lng();
-
-
-
-  //Serial.println(time);
-  if(millis() > time + 2000){
-//    Serial.println(millis());
-    digitalToggle(13);
-
-      Serial.println(gps.location.lat(), 6);
-
-      Serial.print("LAT=");  Serial.println(gps.location.lat(), 6);
-      Serial.print("LONG="); Serial.println(gps.location.lng(), 6);
-      Serial.print("ALT=");  Serial.println(gps.altitude.meters());
-      Serial.print("hdop=");  Serial.println(gps.hdop.value());
-      Serial.print("sats=");  Serial.println(gps.satellites.value());
-
-
-
-
-
-//    Serial.print("Sats in view = "); Serial.println(sats_view);
-//    Serial.print("Sats fix = "); Serial.println(sats_fix);
-//    Serial.print("GPS fix = "); Serial.println(gps_fix);
-//
-//    Serial.print("lon = "); Serial.println(lon);
-//    Serial.print("lat = "); Serial.println(lat);
-//
-//    Serial.print("distance is "); Serial.print(d); Serial.println(" m");
-
-
-    if(hdop < 500 && sats_fix > 3){
-      distance2();
-      lcd.clear();
-      lcd.print("Your goal is");
-      lcd.setCursor(0,1);
-      lcd.print(distance);
-      lcd.print("m away...");
-      delay(8000);
-    }
-    else{
-      lcd.clear();
-      lcd.print("   GPS signal");
-      lcd.setCursor(0, 1);
-      lcd.print("fix:"); lcd.print(sats_fix);
-      lcd.setCursor(8, 1);
-      lcd.print("h:"); lcd.print(hdop);
+    // Check secret button
+    but = !digitalRead(ON_PIN);
+    if(but){
+        secret_button();
     }
 
-    if(distance < 50 && distance != 0){
-      open_box();
+    while (ss.available() > 0)
+       gps.encode(ss.read());
+
+
+        sats_fix = gps.satellites.value();
+        hdop = gps.hdop.value();
+        distance = gps.distanceBetween(position_lat, position_lon, TARGET_1_LAT, TARGET_1_LON);
+        position_lat = gps.location.lat();
+        position_lon = gps.location.lng();
+
+
+//    while (ss.available() > 0)
+//       gps.encode(ss.read());
+
+//       sats_fix = gps.satellites.value();
+//       hdop = gps.hdop.value();
+//       distance = gps.distanceBetween(lat, lon, lat2, lon2);
+//       lat = gps.location.lat();
+//       lon = gps.location.lng();
+
+
+
+
+
+    if(millis() > update_time + 1000){
+        update_time = millis();
+
+        Serial.println(gps.location.lat(), 6);
+
+//        Serial.print("LAT=");  Serial.println(gps.location.lat(), 6);
+//        Serial.print("LONG="); Serial.println(gps.location.lng(), 6);
+//        Serial.print("ALT=");  Serial.println(gps.altitude.meters());
+//        Serial.print("hdop=");  Serial.println(gps.hdop.value());
+//        Serial.print("sats=");  Serial.println(gps.satellites.value());
+
+
+        Serial.print("LAT=");  Serial.println(gps.location.lat(), 6);
+        Serial.print("LONG="); Serial.println(gps.location.lng(), 6);
+        Serial.print("ALT=");  Serial.println(gps.altitude.meters());
+        Serial.print("hdop=");  Serial.println(hdop);
+        Serial.print("sats=");  Serial.println(sats_fix);
+
+
+
+        //Serial.print("Sats in view = "); Serial.println(sats_view);
+        //Serial.print("Sats fix = "); Serial.println(sats_fix);
+        //Serial.print("GPS fix = "); Serial.println(gps_fix);
+        //Serial.print("lon = "); Serial.println(lon);
+        //Serial.print("position_lat = "); Serial.println(position_lat);
+        //Serial.print("distance is "); Serial.print(d); Serial.println(" m");
+
+
+        if(hdop < 500 && sats_fix > 3){
+            distance2();
+            lcd.clear();
+            lcd.print("Your goal is");
+            lcd.setCursor(0,1);
+            lcd.print(distance);
+            lcd.print("m away...");
+            //delay(8000);
+        }
+        else{
+            lcd.clear();
+            lcd.print("   GPS signal");
+            lcd.setCursor(0, 1);
+            lcd.print("fix:"); lcd.print(sats_fix);
+            lcd.setCursor(8, 1);
+            lcd.print("h:"); lcd.print(hdop);
+        }
+
+        if(distance < 50 && distance != 0){
+            open_box();
+        }
     }
-    if(distance){
-      lcd.clear();
-      lcd.print("Going to sleep");
-      delay(3000);
-      go_sleep();
+
+    if(millis() > sleep_time + SLEEP_TIME_MS){
+        lcd.clear();
+        //lcd.print("    No GPS");
+        //lcd.setCursor(0, 1);
+        lcd.print("Going to sleep..");
+        delay(2000);
+
+        go_sleep();
     }
 
 
-    Serial.println("Saving time");
-    Serial.println(time);
-    time = millis();
-  }
-
-  if(millis() > sleep_time + SLEEP_TIME_MS){
-    lcd.clear();
-    lcd.print("    No GPS");
-    lcd.setCursor(0, 1);
-    lcd.print("Going to sleep..");
-    delay(5000);
-
-    go_sleep();
-  }
-
-
-  //delay(100);
+   // delay(500);
 
 }
 
-//
+
 void digitalToggle(int P)
 {
 	if(digitalRead(P) == 1) digitalWrite(P, 0);
@@ -251,69 +199,10 @@ void digitalToggle(int P)
 
 void go_sleep(void)
 {
-
-  digitalWrite(ON_PIN, 0);
-//
-//  //MsTimer2::stop();
-//  //noInterrupts();
-//
-//  Serial.println("Going to sleep.");
-//  digitalWrite(LCD_POWER_PIN, 0);
-//
-//  for(int i = 0; i < 20; i++){
-//    digitalToggle(13);
-//    delay(50);
-//  }
-//
-//  digitalWrite(13, 0);
-//  attachInterrupt(0, pin2_isr, CHANGE);
-//  /* 0, 1, or many lines of code here */
-//  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-//  cli();
-//  sleep_enable();
-//  sleep_bod_disable();
-//  sei();
-//  sleep_cpu();
-//  /* wake up here */
-//  Serial.println("Waking up.");
-//
-//  sleep_time = millis();
-//  interrupt_flag = 1;
-//  sleep_disable();
+    pinMode(ON_PIN, OUTPUT);
+    digitalWrite(ON_PIN, 0);
 }
 
-void pin2_isr()
-{
-  //flagdetachInterrupt(0);
-  interrupt_flag = 1;
-}
-
-void get_gps()
-{
-//  Serial.println("Reading GPS");
-//  while (ss.available()) {
-//
-//    //Serial.println(ss.read());
-//    if (gps.encode(ss.read())) {
-//        char *c = gps.term(0);
-//
-//        //Serial.println(c);
-//
-//        if(strcmp(c, "GPGGA") == 0){
-//          gps_fix = atoi(gps.term(4));
-//          sats_fix = atoi(gps.term(7));
-//          //Serial.println(gps.term(1));
-//        }
-//
-//        if(strcmp(c, "GPGSV") == 0){
-//          sats_view = atoi(gps.term(3));
-//        }
-//
-//        lon = gps.gprmc_longitude();
-//        lat = gps.gprmc_latitude();
-//      }
-//    }
-}
 
 int step1()
 {
@@ -335,37 +224,41 @@ int step1()
 
 int distance2()
 {
-  if(lat != 0 && lon != 0){
-    double deg_to_rad =  3.14/180;
+    if(position_lat != 0 && position_lon != 0){
+        double deg_to_rad =  3.14/180;
 
-    double R = 6371000; // metres
-    double fi1 = lat * deg_to_rad;
-    double fi2 = lat2  * deg_to_rad;
-    double delta_fi = (lat2-lat) * deg_to_rad;
-    double delta_lambda = (lon2-lon) * deg_to_rad;
+        double R = 6371000; // metres
+        double fi1 = position_lat * deg_to_rad;
+        double fi2 = TARGET_1_LAT  * deg_to_rad;
+        double delta_fi = (TARGET_1_LAT-position_lat) * deg_to_rad;
+        double delta_lambda = (TARGET_1_LON-position_lon) * deg_to_rad;
 
-    double a = sin(delta_fi/2) * sin(delta_fi/2) +
-               cos(fi1) * cos(fi2) *
-               sin(delta_lambda/2) * sin(delta_lambda/2);
+        double a = sin(delta_fi/2) * sin(delta_fi/2) +
+                cos(fi1) * cos(fi2) *
+                sin(delta_lambda/2) * sin(delta_lambda/2);
 
-    d = R * ( 2 * atan2(sqrt(a), sqrt(1-a)) );
-    return d;
-  }
-  else return -1;
+        d = R * ( 2 * atan2(sqrt(a), sqrt(1-a)) );
+        return d;
+    }
+    else return -1;
 }
 
 void open_box(){
-  lcd.clear();
-  lcd.print("  Opening box.");
-  lcd.setCursor(0, 1);
-  lcd.print(" Stand clear... ");
-  delay(4000);
-  servo.attach(9);
-  servo.write(DOOR_OPEN);
-  delay(10000);
-  servo.write(DOOR_CLOSED);
-  delay(2000);
-  servo.detach();
+    lcd.clear();
+    lcd.print("  Opening box.");
+    lcd.setCursor(0, 1);
+    lcd.print(" Stand clear... ");
+    delay(4000);
+    //servo.attach(9);
+    servo.attach(SERVO_PIN);
+    digitalWrite(SERVO_ON_PIN, 1);
+    servo.write(DOOR_OPEN);
+    lcd.clear();
+    lcd.print("  Box open ");
+    delay(10000);
+    servo.write(DOOR_CLOSED);
+    delay(2000);
+    servo.detach();
 }
 
 
@@ -373,41 +266,70 @@ void secret_button()
 {
     static unsigned long but1, but2;
     Serial.println("1");
-    while(digitalRead(BUTTON_PIN)){delay(20);}
-      but1 = millis();
-      while(millis() < but1 + BUTTON1_DELAY){delay(20);
-        if(!digitalRead(BUTTON_PIN)){
-          Serial.println("2");
-          while(!digitalRead(BUTTON_PIN)){delay(20);}
-          but1 = millis();
-          while(millis() < but1 + BUTTON1_DELAY){delay(20);
-            if(!digitalRead(BUTTON_PIN)){
-              Serial.println("3");
-              while(!digitalRead(BUTTON_PIN)){delay(20);}
-               but1 = millis();
-               while(millis() < but1 + BUTTON1_DELAY){delay(20);
-               if(!digitalRead(BUTTON_PIN)){
-                 Serial.println("4");
-                 while(!digitalRead(BUTTON_PIN)){delay(20);}
-                 but = millis();
-                 while(millis() < but1 + BUTTON1_DELAY){delay(20);
-                 if(!digitalRead(BUTTON_PIN)){
-                   Serial.println("5");
-                   but1 = millis();
-                   while(!digitalRead(BUTTON_PIN)){delay(20);
-                     Serial.println("6");
-                     if(millis() > but1 + 2000){
-                     open_box();
-                      }
+    while(!digitalRead(ON_PIN)){delay(20);}
+    but1 = millis();
+    while(millis() < but1 + BUTTON1_DELAY){delay(20);
+        if(!digitalRead(ON_PIN)){
+            Serial.println("2");
+            while(!digitalRead(ON_PIN)){delay(20);}
+            but1 = millis();
+            while(millis() < but1 + BUTTON1_DELAY){delay(20);
+                if(!digitalRead(ON_PIN)){
+                    Serial.println("3");
+                    while(!digitalRead(ON_PIN)){delay(20);}
+                    but1 = millis();
+                    while(millis() < but1 + BUTTON1_DELAY){delay(20);
+                        if(!digitalRead(ON_PIN)){
+                            Serial.println("4");
+                            while(!digitalRead(ON_PIN)){delay(20);}
+                            but = millis();
+                            while(millis() < but1 + BUTTON1_DELAY){delay(20);
+                                if(!digitalRead(ON_PIN)){
+                                    Serial.println("5");
+                                    but1 = millis();
+                                    while(!digitalRead(ON_PIN)){delay(20);
+                                        Serial.println("6");
+                                        if(millis() > but1 + 1000){
+                                            open_box();
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
-                  }
                 }
-              }
             }
-          }
         }
-      }
     }
 }
 
+
+float get_battery_voltage_avg(float bat_read){
+    float volt = bat_read*5/1023;
+    float bat_voltage = 0;
+    static float volt_arr[BATTERY_AVAREGE_COUNT];
+    static int volt_cursor;
+
+    volt_arr[volt_cursor] = volt;
+    if(volt_cursor >= BATTERY_AVAREGE_COUNT-1) volt_cursor = 0;
+    else volt_cursor++;
+
+
+    for(int i = 0; i < BATTERY_AVAREGE_COUNT; i++){
+        bat_voltage += volt_arr[i];
+    }
+    bat_voltage = bat_voltage/BATTERY_AVAREGE_COUNT;
+
+    float bat_percent = (bat_voltage - 3.3)*111.1;
+
+
+    Serial.print("Volt/curs: ");
+    Serial.println(volt);
+    Serial.print("/");
+    Serial.println(volt_cursor);
+    Serial.println(bat_read);
+
+
+    return bat_voltage;
+}
 
