@@ -9,6 +9,30 @@
 
 #include "Arduino.h"
 
+
+
+#define TARGET_1_LAT 46.080686
+#define TARGET_1_LON 14.550043
+
+#define LCD_BACKLIGHT_TIME 3000
+#define LCD_POWER_PIN      3
+#define ON_PIN             8
+#define LED_PIN            13
+#define BUTTON_PIN         2
+#define SLEEP_TIME_MS      600000
+#define BUTTON1_DELAY      1000
+#define DOOR_CLOSED        110
+#define DOOR_OPEN          50
+#define SERVO_PIN          9
+#define SERVO_ON_PIN       6
+#define BATTERY_VOLTAGE_PIN A1
+#define BATTERY_AVAREGE_COUNT 20
+
+
+//float bat_voltage;
+
+float get_battery_voltage_avg(float bat_read);
+
 //add your includes for the project here
 
 

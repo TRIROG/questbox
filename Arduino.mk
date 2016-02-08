@@ -1264,10 +1264,10 @@ else
 	@touch $@.sizeok
 endif
 
-#$(OBJDIR)/%.eep: $(OBJDIR)/%.elf $(COMMON_DEPS)
-#	@$(MKDIR) $(dir $@)
-#	-$(OBJCOPY) -j .eeprom --set-section-flags=.eeprom='alloc,load' \
-#		--change-section-lma .eeprom=0 -O ihex $< $@
+$(OBJDIR)/%.eep: $(OBJDIR)/%.elf $(COMMON_DEPS)
+	@$(MKDIR) $(dir $@)
+	-$(OBJCOPY) -j .eeprom --set-section-flags=.eeprom='alloc,load' \
+		--change-section-lma .eeprom=0 -O ihex $< $@
 
 $(OBJDIR)/%.lss: $(OBJDIR)/%.elf $(COMMON_DEPS)
 	@$(MKDIR) $(dir $@)

@@ -6,7 +6,7 @@
 /home/vid/Programs/arduino-1.6.5/libraries/Servo/src
 /home/vid/Programs/arduino-1.6.5/hardware/arduino/avr/libraries
 /home/vid/Programs/arduino-1.6.5/hardware/arduino/avr/libraries/SoftwareSerial/
-/home/vid/Programs/arduino-1.6.5/hardware/arduino/avr/libraries/SoftwareSerial/SoftwareSerial.h
+/home/vid/Programs/arduino-1.6.5/hardware/arduino/avr/libraries/EEPROM/
 
 
 Arduino.mk

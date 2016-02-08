@@ -65,3 +65,5 @@ Arduino.mk
 ../libraries/rfid-master/MFRC522.h
 ../libraries/TimerOne-r11/TimerOne.cpp
 ../libraries/TimerOne-r11/TimerOne.h
+lcd_menu.h
+lcd_menu.cpp
