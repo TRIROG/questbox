@@ -65,6 +65,45 @@ byte black_box[8] = {
 //}
 
 
+wait::wait(){
+    ts = 0;
+}
+
+int wait::start(){
+    ts = millis();
+}
+
+void wait::set_time(unsigned long t){
+    time = t;
+}
+
+int wait::end(){
+    if(millis() - ts > time) return 1;
+    else return 0;
+}
+
+int wait::start(unsigned long t){
+    time = t;
+    wait::start();
+}
+
+unsigned int wait::step(){
+    uint16_t sub;
+    sub = (millis() - ts) / 4000;
+
+    if (sub > 0 ){
+        step_cur += sub;
+
+        return step_cur;
+    }
+
+}
+
+void wait::set_steps(uint16_t s){
+    steps = s;
+}
+
+
 void lcd_welcome(LiquidCrystal_I2C lcd){
     lcd.clear();
     lcd.print("   Quest Box  ");
@@ -122,20 +161,39 @@ void lcd_box_open(LiquidCrystal_I2C lcd){
     lcd.print("  Box open ");
 }
 
+    wait w1, w2, w3, w4;
 
 
 void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance){
 
+    unsigned long ts;
+    unsigned int step;
+     w1.set_time(4000);
+     w1.start();
+     w1.set_steps(2);
+
+
+    if(millis() - ts > 4000){
+        step++;
+        if (step > 5) step = 0;
+    }
+
+
     switch (target){
     case 1:
         lcd.clear();
-        //lcd.print("OOOOOOOOOOOOOOOOHHHHHHHHHHHHHHHH");
-        lcd.print("Find the monumen"); lcd.setCursor(0,1);
-        lcd.print("t of Peasant");
-        delay(4000);
-        lcd.clear();
-        lcd.print("uprising that"); lcd.setCursor(0,1);
-        lcd.print("overlook city.");
+        if(w1.step() ==1){
+            //lcd.print("OOOOOOOOOOOOOOOOHHHHHHHHHHHHHHHH");
+            lcd.print("Find the monumen"); lcd.setCursor(0,1);
+            lcd.print("t of Peasant");
+            w2.start(4000);
+        }
+        //delay(4000);
+        if(w1.step() == 2 ){
+            lcd.clear();
+            lcd.print("uprising that"); lcd.setCursor(0,1);
+            lcd.print("overlook city.");
+        }
         delay(4000);
         break;
 

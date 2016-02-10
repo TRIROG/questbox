@@ -42,6 +42,11 @@ unsigned int target;
 
 void setup()
 {
+
+
+
+
+
     //lcd_target target1_zmajev_tempelj;
 
 //    target1_zmajev_tempelj.set_lcd(lcd);
@@ -59,6 +64,7 @@ void setup()
     pinMode(SERVO_ON_PIN, OUTPUT);
     pinMode(ON_PIN, INPUT);
     pinMode(LCD_POWER_PIN, OUTPUT);
+    pinMode(GPS_RX_PIN, INPUT);
 
     digitalWrite(LCD_POWER_PIN, 1);
     digitalWrite(SERVO_ON_PIN, 0);
@@ -73,6 +79,10 @@ void setup()
     //lcd.print("   Quest Box  ");
 
     Serial.println("Setup done.");
+
+    wait w;
+    w.set_time(3000);
+    w.start();
 }
 
 void loop()
@@ -123,16 +133,16 @@ void loop()
 
 
 
-    target = 1;
-    lcd_target(lcd, target, distance);
+//    target = 1;
+//    lcd_target(lcd, target, distance);
 
-    if (fix){
-        lcd_distance_target1(lcd, distance);
-    }
-    else{
-        lcd_gps_signal(lcd, strength);
-        delay(4000);
-    }
+//    if (fix){
+//        lcd_distance_target1(lcd, distance);
+//    }
+//    else{
+//        lcd_gps_signal(lcd, strength);
+//        delay(4000);
+//    }
 
 
 

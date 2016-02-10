@@ -19,6 +19,7 @@
 #define ON_PIN             8
 #define LED_PIN            13
 #define BUTTON_PIN         2
+#define GPS_RX_PIN         4
 #define SLEEP_TIME_MS      600000
 #define BUTTON1_DELAY      1000
 #define DOOR_CLOSED        110
