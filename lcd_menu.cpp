@@ -1,6 +1,7 @@
 #include "lcd_menu.h"
 #include "QwestBox.h"
 
+
 byte black_box[8] = {
   B00000,
   B10001,
@@ -12,11 +13,56 @@ byte black_box[8] = {
 };
 
 
-class lcd_step_point(){
+//lcd_target::lcd_target(){
+//    //lcd_target::lcd = lcd;
+//}
 
-} step_point;
+//void lcd_target::set_lcd(LiquidCrystal_I2C lcd1){
+//    lcd = lcd1;
+//}
 
 
+//void lcd_target::display(){
+
+//    unsigned int text_pos_cur, text_pos_prev;
+//    char page[5][256];
+//    unsigned int cur_page = 0;
+
+//    char *text_search;
+
+//    //lcd.clear();
+
+//    if (strlen(text) > 32){
+//        text_search = strchr(text, ' ');
+
+//        while (lcd_target::text_search != NULL)
+//        {
+//          text_pos_prev = lcd_target::text_search - lcd_target::text + 1; //current position of " ".
+
+//          //printf ("found at %d\n",lcd_target::text_search-lcd_target::text+1);
+
+//          lcd_target::text_search = strchr(lcd_target::text + 1, ' ');
+//          text_pos_cur = lcd_target::text_search - lcd_target::text + 1;
+
+//          if (text_pos_prev < 32 && text_pos_cur >= 32) {
+//              strncpy(page[0], text, text_pos_prev);
+//          }
+
+////          if (text_pos_prev + 32 < 64 && text_pos_cur >= 32) {
+////              strncpy(page[0], text)
+////          }
+
+//        }
+
+//    }
+
+
+////    lcd.setCursor(0,1);
+////    lcd.print("Battery: ");
+////    lcd.print((int)bat_percent);
+//    lcd_target::lcd.print("%");
+////    delay(3000);
+//}
 
 
 void lcd_welcome(LiquidCrystal_I2C lcd){
@@ -75,3 +121,44 @@ void lcd_box_open(LiquidCrystal_I2C lcd){
     lcd.clear();
     lcd.print("  Box open ");
 }
+
+
+
+void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance){
+
+    switch (target){
+    case 1:
+        lcd.clear();
+        //lcd.print("OOOOOOOOOOOOOOOOHHHHHHHHHHHHHHHH");
+        lcd.print("Find the monumen"); lcd.setCursor(0,1);
+        lcd.print("t of Peasant");
+        delay(4000);
+        lcd.clear();
+        lcd.print("uprising that"); lcd.setCursor(0,1);
+        lcd.print("overlook city.");
+        delay(4000);
+        break;
+
+    case 2: // Find the dragon above entrance to the castle.  When you find it Check your phone
+        lcd.clear();
+      //lcd.print("OOOOOOOOOOOOOOOOHHHHHHHHHHHHHHHH");
+        lcd.print("Find the dragon"); lcd.setCursor(0,1);
+        lcd.print("above entrance");
+        delay(4000);
+        lcd.clear();
+        lcd.print("to the castle."); lcd.setCursor(0,1);
+        lcd.print("When you find it");
+        delay(4000);
+        lcd.clear();
+        lcd.print("Check your phone"); lcd.setCursor(0,1);
+        break;
+    case 3:
+        break;
+
+
+    }
+
+}
+
+
+

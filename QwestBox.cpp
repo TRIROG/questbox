@@ -31,10 +31,25 @@ unsigned short sentences, failed;
 int but;
 int test = 0;
 bool interrupt_flag = 0;
+bool fix = 0;
+int strength;
+unsigned int target;
+
+
+
+
 
 
 void setup()
 {
+    //lcd_target target1_zmajev_tempelj;
+
+//    target1_zmajev_tempelj.set_lcd(lcd);
+//    target1_zmajev_tempelj.lat = 46.047575;
+//    target1_zmajev_tempelj.lon = 14.505386;
+    //target1_zmajev_tempelj.text = "Find the monument of the Peasant uprisings that overlook the city.";
+
+
     //EEPROM.write(1,1);
 
     // Init pin outputs
@@ -68,7 +83,8 @@ void loop()
         secret_button();
     }
 
-    while (ss.available() > 0)
+    unsigned long t = millis();
+    while (ss.available() > 0 || t + 1100 < millis())
         gps.encode(ss.read());
 
     sats_fix = gps.satellites.value();
@@ -76,6 +92,8 @@ void loop()
     distance = gps.distanceBetween(position_lat, position_lon, TARGET_1_LAT, TARGET_1_LON);
     position_lat = gps.location.lat();
     position_lon = gps.location.lng();
+
+
 
     if(millis() > update_time + 1000){
         update_time = millis();
@@ -88,11 +106,13 @@ void loop()
         Serial.print("sats=");  Serial.println(sats_fix);
 
         if(hdop < 500 && sats_fix > 3){
+            fix = 1;
             distance = gps.distanceBetween(position_lat, position_lon, TARGET_1_LAT, TARGET_1_LON);
             lcd_distance_target1(lcd, distance);
         }
         else{
-            int strength = sats_fix;
+            fix = 0;
+            strength = sats_fix;
             lcd_gps_signal(lcd, strength);
         }
 
@@ -100,6 +120,21 @@ void loop()
             open_box();
         }
     }
+
+
+
+    target = 1;
+    lcd_target(lcd, target, distance);
+
+    if (fix){
+        lcd_distance_target1(lcd, distance);
+    }
+    else{
+        lcd_gps_signal(lcd, strength);
+        delay(4000);
+    }
+
+
 
     if(millis() > sleep_time + SLEEP_TIME_MS){
         lcd.clear();
