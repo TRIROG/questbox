@@ -12,9 +12,9 @@ byte black_box[8] = {
 };
 
 
-class lcd_step_point(){
+//class lcd_step_point(){
 
-} step_point;
+//} step_point;
 
 
 
