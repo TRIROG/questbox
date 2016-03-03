@@ -35,27 +35,28 @@ bool fix = 0;
 int strength;
 unsigned int target;
 
-
-
-
+double target_lon[10];
+double target_lat[10];
 
 
 void setup()
 {
 
 
+    target_lon[1] = TARGET_1_LAT;
+    target_lat[1] = TARGET_1_LON;
+    target_lon[2] = TARGET_2_LAT;
+    target_lat[2] = TARGET_2_LON;
+    target_lon[3] = TARGET_3_LAT;
+    target_lat[3] = TARGET_3_LON;
+    target_lon[4] = TARGET_4_LAT;
+    target_lat[4] = TARGET_4_LON;
 
-
-
-    //lcd_target target1_zmajev_tempelj;
-
-//    target1_zmajev_tempelj.set_lcd(lcd);
-//    target1_zmajev_tempelj.lat = 46.047575;
-//    target1_zmajev_tempelj.lon = 14.505386;
-    //target1_zmajev_tempelj.text = "Find the monument of the Peasant uprisings that overlook the city.";
-
-
-    //EEPROM.write(1,1);
+    target = EEPROM.read(EEPROM_TARGET_INDEX);
+    if(target > NUMBER_OF_TARGETS+2 || target == 0 /*|| TARGET_RESET > 0*/) {
+        target = 1;
+        EEPROM.write(EEPROM_TARGET_INDEX, target);
+    }
 
     // Init pin outputs
     pinMode(BATTERY_VOLTAGE_PIN, INPUT);
@@ -103,6 +104,48 @@ void loop()
     position_lat = gps.location.lat();
     position_lon = gps.location.lng();
 
+    //target = 7; // debug
+    distance = gps.distanceBetween(position_lat, position_lon, target_lat[target], target_lon[target]);
+    //distance = 4; // debug
+
+    if (distance > 30){
+        lcd_target(lcd, target, distance, sats_fix);
+    }
+    else {
+        wait finish;
+        finish.set_time(2500);
+        finish.set_steps(2);
+        lcd.setCursor(0, 0);
+
+        if(finish.step() == 1){
+            lcd.print("You are at your ");
+            lcd.setCursor(0, 1);
+            lcd.print("current target.");
+        }
+        if (finish.step() == 2){
+            lcd.setCursor(0, 0);
+            lcd.print("Press the button");
+            lcd.setCursor(0, 1);
+            lcd.print("to continue...  ");
+        }
+
+        if (but == 1){
+            // Go to next target
+            target++;
+
+            if(target > NUMBER_OF_TARGETS){
+                lcd.clear();
+                lcd.setCursor(0, 0);
+                lcd.print("CONRATULATIONS! ");
+                delay(5000);
+                open_box();
+            }
+            else {
+                EEPROM.write(EEPROM_TARGET_INDEX, target);
+            }
+
+        }
+    }
 
 
     if(millis() > update_time + 1000){
@@ -115,41 +158,24 @@ void loop()
         Serial.print("hdop=");  Serial.println(hdop);
         Serial.print("sats=");  Serial.println(sats_fix);
 
-        if(hdop < 500 && sats_fix > 3){
+        if(hdop < 500 && sats_fix > 4){
             fix = 1;
             distance = gps.distanceBetween(position_lat, position_lon, TARGET_1_LAT, TARGET_1_LON);
-            lcd_distance_target1(lcd, distance);
+
         }
         else{
             fix = 0;
             strength = sats_fix;
-            lcd_gps_signal(lcd, strength);
+            //lcd_gps_signal(lcd, strength);
         }
 
         if(distance < 50 && distance != 0){
-            open_box();
+            //open_box();
         }
     }
 
-
-
-//    target = 1;
-//    lcd_target(lcd, target, distance);
-
-//    if (fix){
-//        lcd_distance_target1(lcd, distance);
-//    }
-//    else{
-//        lcd_gps_signal(lcd, strength);
-//        delay(4000);
-//    }
-
-
-
     if(millis() > sleep_time + SLEEP_TIME_MS){
         lcd.clear();
-        //lcd.print("    No GPS");
-        //lcd.setCursor(0, 1);
         lcd.print("Going to sleep..");
         delay(2000);
 
@@ -219,15 +245,46 @@ void secret_button()
                         if(!digitalRead(ON_PIN)){
                             Serial.println("4");
                             while(!digitalRead(ON_PIN)){delay(20);}
-                            but = millis();
+                            but1 = millis();
                             while(millis() < but1 + BUTTON1_DELAY){delay(20);
                                 if(!digitalRead(ON_PIN)){
                                     Serial.println("5");
                                     but1 = millis();
                                     while(!digitalRead(ON_PIN)){delay(20);
                                         Serial.println("6");
-                                        if(millis() > but1 + 1000){
-                                            open_box();
+                                        if(millis() > but1 + 800){
+                                            Serial.println("Release now!");
+
+                                            lcd.clear();
+                                            lcd.setCursor(0, 0);
+                                            lcd.print("Release now!");
+                                            delay(500);
+
+                                            lcd.clear();
+                                            lcd.setCursor(0, 0);
+                                            lcd.print("Press: open box");
+                                            lcd.setCursor(0,1);
+                                            lcd.print("Hold: reset game");
+
+                                            delay(1000);
+
+                                            while(digitalRead(ON_PIN)){}
+                                            but1 = millis();
+                                            while(!digitalRead(ON_PIN)){delay(20);}
+
+                                            if(millis() - but1 > 1000){
+                                                lcd.clear();
+                                                lcd.print("RESET GAME!");
+                                                delay(3000);
+                                                target = 1;
+                                                EEPROM.write(EEPROM_TARGET_INDEX, 1);
+
+                                                break;
+                                            }
+                                            else {
+                                                open_box();
+                                                break;
+                                            }
                                         }
                                     }
                                 }

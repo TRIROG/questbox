@@ -9,10 +9,21 @@
 
 #include "Arduino.h"
 
+#define NUMBER_OF_TARGETS 7
+#define TARGET_RESET 0
 
+#define TARGET_1_LAT 46.047716
+#define TARGET_1_LON 14.509190
 
-#define TARGET_1_LAT 46.080686
-#define TARGET_1_LON 14.550043
+#define TARGET_2_LAT 46.046268
+#define TARGET_2_LON 14.508479
+
+#define TARGET_3_LAT 46.047012
+#define TARGET_3_LON 14.503804
+
+#define TARGET_4_LAT 46.047815
+#define TARGET_4_LON 14.505000
+
 
 #define LCD_BACKLIGHT_TIME 3000
 #define LCD_POWER_PIN      3
@@ -28,6 +39,7 @@
 #define SERVO_ON_PIN       6
 #define BATTERY_VOLTAGE_PIN A1
 #define BATTERY_AVAREGE_COUNT 20
+#define EEPROM_TARGET_INDEX 10
 
 
 //float bat_voltage;

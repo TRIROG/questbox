@@ -67,3 +67,4 @@ Arduino.mk
 ../libraries/TimerOne-r11/TimerOne.h
 lcd_menu.h
 lcd_menu.cpp
+QwestBox.pro
