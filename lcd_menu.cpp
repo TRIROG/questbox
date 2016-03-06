@@ -1,5 +1,6 @@
 #include "lcd_menu.h"
 #include "QwestBox.h"
+#include "wait.h"
 
 
 byte black_box[8] = {
@@ -13,116 +14,10 @@ byte black_box[8] = {
 };
 
 
-//lcd_target::lcd_target(){
-//    //lcd_target::lcd = lcd;
-//}
-
-//void lcd_target::set_lcd(LiquidCrystal_I2C lcd1){
-//    lcd = lcd1;
-//}
-
-
-//void lcd_target::display(){
-
-//    unsigned int text_pos_cur, text_pos_prev;
-//    char page[5][256];
-//    unsigned int cur_page = 0;
-
-//    char *text_search;
-
-//    //lcd.clear();
-
-//    if (strlen(text) > 32){
-//        text_search = strchr(text, ' ');
-
-//        while (lcd_target::text_search != NULL)
-//        {
-//          text_pos_prev = lcd_target::text_search - lcd_target::text + 1; //current position of " ".
-
-//          //printf ("found at %d\n",lcd_target::text_search-lcd_target::text+1);
-
-//          lcd_target::text_search = strchr(lcd_target::text + 1, ' ');
-//          text_pos_cur = lcd_target::text_search - lcd_target::text + 1;
-
-//          if (text_pos_prev < 32 && text_pos_cur >= 32) {
-//              strncpy(page[0], text, text_pos_prev);
-//          }
-
-////          if (text_pos_prev + 32 < 64 && text_pos_cur >= 32) {
-////              strncpy(page[0], text)
-////          }
-
-//        }
-
-//    }
-
-
-////    lcd.setCursor(0,1);
-////    lcd.print("Battery: ");
-////    lcd.print((int)bat_percent);
-//    lcd_target::lcd.print("%");
-////    delay(3000);
-//}
-
-
-wait::wait(){
-    //ts = 0;
-}
-
-int wait::start(){
-    ts = millis();
-}
-
-void wait::set_time(unsigned long t){
-    time = t;
-}
-
-int wait::end(){
-    if(millis() - ts > time) return 1;
-    else return 0;
-}
-
-int wait::start(unsigned long t){
-    time = t;
-    wait::start();
-}
-
-unsigned int wait::step(){
-    uint16_t sub;
-    sub = (millis() - wait::ts);
-
-    //Serial.print("Sub: "); Serial.println(wait::ts);
-    Serial.print("Sub: "); Serial.println(sub);
-    Serial.print("ts: "); Serial.println(wait::ts);
-
-    Serial.print("Sub/4000: "); Serial.println(sub/4000);
-
-    if (sub > 4000 ){
-
-        step_cur += sub/4000;
-
-        Serial.print("Sub increment to: "); Serial.println(step_cur);
-
-        wait::ts = millis();
-        if(step_cur > steps) step_cur = 1;
-
-
-        Serial.print("Step_cur: "); Serial.println(step_cur);
-        return step_cur;
-    }
-    else return step_cur;
-
-}
-
-void wait::set_steps(uint16_t s){
-    steps = s;
-}
-
-
 void lcd_welcome(LiquidCrystal_I2C lcd){
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("   Quest Box  ");
+    lcd.print(F("   Quest Box  "));
 
     // Init battery voltage
     for(int i = 0; i < BATTERY_AVAREGE_COUNT; i++) get_battery_voltage_avg(analogRead(BATTERY_VOLTAGE_PIN));
@@ -130,21 +25,21 @@ void lcd_welcome(LiquidCrystal_I2C lcd){
     float bat_percent = (bat_voltage - 3.3)*111.1;
 
     lcd.setCursor(0,1);
-    lcd.print("Battery: ");
+    lcd.print(F("Battery: "));
     lcd.print((int)bat_percent);
-    lcd.print("%");
+    lcd.print(F("%"));
     delay(3000);
 }
 
 void lcd_distance_target1(LiquidCrystal_I2C lcd, double distance){
     //lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("Your next stop");
+    lcd.print(F("Your next stop"));
     lcd.setCursor(0,1);
-    lcd.print("is ");
+    lcd.print(F("is "));
     lcd.print((int)distance);
-    lcd.print(" ");
-    lcd.print("m away...");
+    lcd.print(F(" "));
+    lcd.print(F("m away..."));
 }
 
 void lcd_gps_signal(LiquidCrystal_I2C lcd, unsigned int strength){
@@ -159,12 +54,12 @@ void lcd_gps_signal(LiquidCrystal_I2C lcd, unsigned int strength){
 
     //lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("   GPS signal");
+    lcd.print(F("   GPS signal"));
     lcd.setCursor(0,1);
-    lcd.print("[");
+    lcd.print(F("["));
     lcd.print(bar);
     lcd.setCursor(15,1);
-    lcd.print("]");
+    lcd.print(F("]"));
 }
 
 
@@ -172,70 +67,59 @@ void lcd_gps_signal(LiquidCrystal_I2C lcd, unsigned int strength){
 void lcd_open_box(LiquidCrystal_I2C lcd){
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("  Opening box.");
+    lcd.print(F("  Opening box."));
     lcd.setCursor(0, 1);
-    lcd.print(" Stand clear... ");
+    lcd.print(F(" Stand clear... "));
 }
 
 void lcd_box_open(LiquidCrystal_I2C lcd){
     lcd.clear();
-    lcd.print("  Box open ");
+    lcd.print(F("  Box open "));
 }
 
-    wait wait_1, wait_2, wait_3, w4;
+    wait wait_4_steps, wait_3_steps, wait_3, w4;
 
 
 void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, unsigned int signal){
 
     unsigned long ts;
     unsigned int step;
-    // wait_1.set_time(4000);
-     //wait_1.start();
-     wait_1.set_steps(4);
-     wait_2.set_steps(4);
+
+     wait_4_steps.set_steps(4);
+     wait_3_steps.set_steps(3);
      wait_3.set_steps(4);
    //  wait_4.set_steps(3);
 
-    Serial.print("Target: ");
-    Serial.print(target);
-    Serial.print(", step: ");
-    Serial.println(wait_1.step());
-
     static unsigned int wait_temp;
-    if (wait_temp != wait_1.step()){
+    if (wait_temp != wait_4_steps.step()){
         lcd.clear();
-
-        Serial.println("CLLLLLLLLLLLLLLLLLLLLLLLLLLEEEEEEEEEEEEEEEEEEAAAAAAAAAAAAAAAAAAR");
-        delay(300);
-
-        wait_temp = wait_1.step();
+        wait_temp = wait_4_steps.step();
     }
+
+    int step3  = wait_3_steps.step();
+    int step4  = wait_4_steps.step();
 
 
     switch (target){
     case 1:
-        //lcd.clear();
-        //lcd.setCursor(0, 0);
-        //lcd.print("Test");
-        //delay(2000);
-        if(wait_1.step() ==1){
+        if(wait_4_steps.step() ==1){
             lcd.setCursor(0, 0);
-            lcd.print("A dragon you"); lcd.setCursor(0,1);
-            lcd.print("will meet,");
-            wait_2.start(4000);
+            lcd.print(F("A dragon you")); lcd.setCursor(0,1);
+            lcd.print(F("will meet,"));
+            wait_3_steps.start(SCREEN_DELAY_DEFAULT);
         }
-        //delay(4000);
-        if(wait_1.step() == 2 ){
+        //delay(SCREEN_DELAY_DEFAULT);
+        if(wait_4_steps.step() == 2 ){
             lcd.setCursor(0, 0);
-            lcd.print("above the"); lcd.setCursor(0,1);
-            lcd.print("castle door");
+            lcd.print(F("above the")); lcd.setCursor(0,1);
+            lcd.print(F("castle door"));
         }
-        if(wait_1.step() == 3 ){
+        if(wait_4_steps.step() == 3 ){
             lcd.setCursor(0, 0);
-            lcd.print("you will find"); lcd.setCursor(0,1);
-            lcd.print("his seat.");
+            lcd.print(F("you will find")); lcd.setCursor(0,1);
+            lcd.print(F("his seat."));
         }
-        if(wait_1.step() == 4 ){
+        if(wait_4_steps.step() == 4 ){
             if(signal > 5){
                 lcd_distance_target1(lcd, distance);
             }
@@ -246,36 +130,159 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
         break;
 
     case 2: //
-        lcd.clear();
-        lcd.print("A dragon you"); lcd.setCursor(0,1);
-        lcd.print("will meet,");
-        delay(4000);
-        lcd.clear();
-        lcd.print("above the"); lcd.setCursor(0,1);
-        lcd.print("castle door");
-        delay(4000);
-        lcd.clear();
-        lcd.print("you will find"); lcd.setCursor(0,1);
-        lcd.print("his seat.");
+        if(wait_4_steps.step() ==1){
+            lcd.setCursor(0, 0);
+            lcd.print(F("A house by the")); lcd.setCursor(0,1);
+            lcd.print(F("church you"));
+            wait_3_steps.start(SCREEN_DELAY_DEFAULT);
+        }
+        //delay(SCREEN_DELAY_DEFAULT);
+        if(wait_4_steps.step() == 2 ){
+            lcd.setCursor(0, 0);
+            lcd.print(F("should mind,")); lcd.setCursor(0,1);
+            lcd.print(F("A statue with"));
+        }
+        if(wait_4_steps.step() == 3 ){
+            lcd.setCursor(0, 0);
+            lcd.print(F("a dragon there")); lcd.setCursor(0,1);
+            lcd.print(F("you will find."));
+        }
+        if(wait_4_steps.step() == 4 ){
+            if(signal > 5){
+                lcd_distance_target1(lcd, distance);
+            }
+            else {
+                lcd_gps_signal(lcd, signal);
+            }
+        }
         break;
     case 3:
-        lcd.clear();
-        lcd.print("A house by the"); lcd.setCursor(0,1);
-        lcd.print("church you");
-        delay(4000);
-        lcd.clear();
-        lcd.print("should mind,"); lcd.setCursor(0,1);
-        lcd.print("A statue with");
-        delay(4000);
-        lcd.clear();
-        lcd.print("a dragon there"); lcd.setCursor(0,1);
-        lcd.print("you will find.");
+        if(wait_3_steps.step() ==1){
+            lcd.setCursor(0, 0);
+            lcd.print(F("Find a")); lcd.setCursor(0,1);
+            lcd.print(F("golden face,"));
+            wait_3_steps.start(SCREEN_DELAY_DEFAULT);
+        }
+        //delay(SCREEN_DELAY_DEFAULT);
+        if(wait_3_steps.step() == 2 ){
+            lcd.setCursor(0, 0);
+            lcd.print(F("Twenty steps")); lcd.setCursor(0,1);
+            lcd.print(F("from this place."));
+        }
+        if(wait_3_steps.step() == 3 ){
+            if(signal > 5){
+                lcd_distance_target1(lcd, distance);
+            }
+            else {
+                lcd_gps_signal(lcd, signal);
+            }
+        }
         break;
-
-
+    case 4:
+        if(wait_3_steps.step() ==1){
+            lcd.setCursor(0, 0);
+            lcd.print(F("Dragons at the")); lcd.setCursor(0,1);
+            lcd.print(F("river wait,"));
+            wait_3_steps.start(SCREEN_DELAY_DEFAULT);
+        }
+        if(wait_3_steps.step() == 2 ){
+            lcd.setCursor(0, 0);
+            lcd.print(F("lurking for")); lcd.setCursor(0,1);
+            lcd.print(F("another bait."));
+        }
+        if(wait_3_steps.step() == 3 ){
+            if(signal > 5){
+                lcd_distance_target1(lcd, distance);
+            }
+            else {
+                lcd_gps_signal(lcd, signal);
+            }
+        }
+        break;
+    case 5:
+        switch (step4){
+        case 1:
+            lcd.setCursor(0, 0);
+            lcd.print(F("To the fountain")); lcd.setCursor(0,1);
+            lcd.print(F("you must go"));
+            wait_3_steps.start(SCREEN_DELAY_DEFAULT);
+            break;
+        case 2:
+            lcd.setCursor(0, 0);
+            lcd.print(F("from which")); lcd.setCursor(0,1);
+            lcd.print(F("three rivers"));
+            break;
+        case 3:
+            lcd.setCursor(0, 0);
+            lcd.print(F("flow.")); lcd.setCursor(0,1);
+            lcd.print(F(""));
+            break;
+        case 4:
+            if(signal > 5){
+                lcd_distance_target1(lcd, distance);
+            }
+            else {
+                lcd_gps_signal(lcd, signal);
+            }
+            break;
+        }
+        break;
+    case 6:
+        switch (step3){
+        case 1:
+            lcd.setCursor(0, 0);
+            lcd.print(F("Dragon bridge")); lcd.setCursor(0,1);
+            lcd.print(F("is near, If you"));
+            wait_3_steps.start(SCREEN_DELAY_DEFAULT);
+            break;
+        case 2:
+            lcd.setCursor(0, 0);
+            lcd.print(F("don’t find it,")); lcd.setCursor(0,1);
+            lcd.print(F("ask, do not fear"));
+            break;
+        case 3:
+            if(signal > 5){
+                lcd_distance_target1(lcd, distance);
+            }
+            else {
+                lcd_gps_signal(lcd, signal);
+            }
+            break;
+        }
+        break;
+    case 7:
+        switch (step4){
+        case 1:
+            lcd.setCursor(0, 0);
+            lcd.print(F("Under the bridge")); lcd.setCursor(0,1);
+            lcd.print(F("is a palm tree,"));
+            wait_3_steps.start(SCREEN_DELAY_DEFAULT);
+            break;
+        case 2:
+            lcd.setCursor(0, 0);
+            lcd.print(F("there you")); lcd.setCursor(0,1);
+            lcd.print(F("will find"));
+            break;
+        case 3:
+            lcd.setCursor(0, 0);
+            lcd.print(F("numbers three.")); lcd.setCursor(0,1);
+            lcd.print(F(" "));
+            break;
+        case 4:
+            if(signal > 5){
+                lcd_distance_target1(lcd, distance);
+            }
+            else {
+                lcd_gps_signal(lcd, signal);
+            }
+            break;
+        }
+        break;
     }
 
 }
+
+
 
 
 

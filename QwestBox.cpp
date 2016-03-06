@@ -6,6 +6,8 @@
 #include <Servo.h>
 #include "lcd_menu.h"
 #include "EEPROM.h"
+#include "wait.h"
+#include "/home/vid/Arduino/libraries/MemoryFree/MemoryFree.h"
 
 TinyGPSPlus gps;
 //LiquidCrystal lcd(8, 10, 4, 5, 6, 7);
@@ -38,11 +40,17 @@ unsigned int target;
 double target_lon[10];
 double target_lat[10];
 
+ extern int __heap_start, *__brkval;
+
+ int freeRam () {
+   extern int __heap_start, *__brkval;
+   int v;
+   return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+ }
+
 
 void setup()
 {
-
-
     target_lon[1] = TARGET_1_LAT;
     target_lat[1] = TARGET_1_LON;
     target_lon[2] = TARGET_2_LAT;
@@ -77,17 +85,27 @@ void setup()
     lcd.backlight();
 
     lcd_welcome(lcd);
-    //lcd.print("   Quest Box  ");
+    //lcd.print(F("   Quest Box  "));
 
-    Serial.println("Setup done.");
+
 
     wait w;
     w.set_time(3000);
     w.start();
+
+    wait sim;
+    w.set_time(30000);
+    sim.set_steps(7);
+    sim.start();
+
+    Serial.print(F("Free RAM:"));    Serial.println(freeRam());
+    Serial.println(F("Setup done."));
 }
 
 void loop()
 {
+    //Serial.print(F("Free RAM:"));    Serial.println(freeRam());
+
     // Check secret button
     but = !digitalRead(ON_PIN);
     if(but){
@@ -118,15 +136,15 @@ void loop()
         lcd.setCursor(0, 0);
 
         if(finish.step() == 1){
-            lcd.print("You are at your ");
+            lcd.print(F("You are at your "));
             lcd.setCursor(0, 1);
-            lcd.print("current target.");
+            lcd.print(F("current target."));
         }
         if (finish.step() == 2){
             lcd.setCursor(0, 0);
-            lcd.print("Press the button");
+            lcd.print(F("Press the button"));
             lcd.setCursor(0, 1);
-            lcd.print("to continue...  ");
+            lcd.print(F("to continue...  "));
         }
 
         if (but == 1){
@@ -136,7 +154,7 @@ void loop()
             if(target > NUMBER_OF_TARGETS){
                 lcd.clear();
                 lcd.setCursor(0, 0);
-                lcd.print("CONRATULATIONS! ");
+                lcd.print(F("CONRATULATIONS! "));
                 delay(5000);
                 open_box();
             }
@@ -147,16 +165,15 @@ void loop()
         }
     }
 
-
     if(millis() > update_time + 1000){
         update_time = millis();
 
-        Serial.println(gps.location.lat(), 6);
-        Serial.print("LAT=");  Serial.println(gps.location.lat(), 6);
-        Serial.print("LONG="); Serial.println(gps.location.lng(), 6);
-        Serial.print("ALT=");  Serial.println(gps.altitude.meters());
-        Serial.print("hdop=");  Serial.println(hdop);
-        Serial.print("sats=");  Serial.println(sats_fix);
+//        Serial.println(gps.location.lat(), 6);
+//        Serial.print(F("LAT="));  Serial.println(gps.location.lat(), 6);
+//        Serial.print(F("LONG=")); Serial.println(gps.location.lng(), 6);
+//        Serial.print(F("ALT="));  Serial.println(gps.altitude.meters());
+//        Serial.print(F("hdop="));  Serial.println(hdop);
+//        Serial.print(F("sats="));  Serial.println(sats_fix);
 
         if(hdop < 500 && sats_fix > 4){
             fix = 1;
@@ -176,7 +193,7 @@ void loop()
 
     if(millis() > sleep_time + SLEEP_TIME_MS){
         lcd.clear();
-        lcd.print("Going to sleep..");
+        lcd.print(F("Going to sleep.."));
         delay(2000);
 
         go_sleep();
@@ -194,7 +211,7 @@ int step1()
 {
     //Wait for GPS
     lcd.clear();
-    lcd.println("Looking for GPS");
+    lcd.println(F("Looking for GPS"));
     lcd.setCursor(0, 1);
     char str[32];
     sprintf(str,"view:%2d  fix:%2d", sats_view, sats_fix);
@@ -217,7 +234,7 @@ void open_box(){
     servo.write(DOOR_OPEN);
     lcd_box_open(lcd);
     lcd.clear();
-    lcd.print("    Box open ");
+    lcd.print(F("    Box open "));
     delay(20000);
     servo.write(DOOR_CLOSED);
     delay(3000);
@@ -228,43 +245,43 @@ void open_box(){
 void secret_button()
 {
     static unsigned long but1;
-    Serial.println("1");
+    Serial.println(F("1"));
     while(!digitalRead(ON_PIN)){delay(20);}
     but1 = millis();
     while(millis() < but1 + BUTTON1_DELAY){delay(20);
         if(!digitalRead(ON_PIN)){
-            Serial.println("2");
+            Serial.println(F("2"));
             while(!digitalRead(ON_PIN)){delay(20);}
             but1 = millis();
             while(millis() < but1 + BUTTON1_DELAY){delay(20);
                 if(!digitalRead(ON_PIN)){
-                    Serial.println("3");
+                    Serial.println(F("3"));
                     while(!digitalRead(ON_PIN)){delay(20);}
                     but1 = millis();
                     while(millis() < but1 + BUTTON1_DELAY){delay(20);
                         if(!digitalRead(ON_PIN)){
-                            Serial.println("4");
+                            Serial.println(F("4"));
                             while(!digitalRead(ON_PIN)){delay(20);}
                             but1 = millis();
                             while(millis() < but1 + BUTTON1_DELAY){delay(20);
                                 if(!digitalRead(ON_PIN)){
-                                    Serial.println("5");
+                                    Serial.println(F("5"));
                                     but1 = millis();
                                     while(!digitalRead(ON_PIN)){delay(20);
-                                        Serial.println("6");
+                                        Serial.println(F("6"));
                                         if(millis() > but1 + 800){
-                                            Serial.println("Release now!");
+                                            Serial.println(F("Release now!"));
 
                                             lcd.clear();
                                             lcd.setCursor(0, 0);
-                                            lcd.print("Release now!");
+                                            lcd.print(F("Release now!"));
                                             delay(500);
 
                                             lcd.clear();
                                             lcd.setCursor(0, 0);
-                                            lcd.print("Press: open box");
+                                            lcd.print(F("Press: open box"));
                                             lcd.setCursor(0,1);
-                                            lcd.print("Hold: reset game");
+                                            lcd.print(F("Hold: reset game"));
 
                                             delay(1000);
 
@@ -274,7 +291,7 @@ void secret_button()
 
                                             if(millis() - but1 > 1000){
                                                 lcd.clear();
-                                                lcd.print("RESET GAME!");
+                                                lcd.print(F("RESET GAME!"));
                                                 delay(3000);
                                                 target = 1;
                                                 EEPROM.write(EEPROM_TARGET_INDEX, 1);
@@ -317,12 +334,12 @@ float get_battery_voltage_avg(float bat_read){
     float bat_percent = (bat_volt - 3.3)*111.1;
 
 
-    Serial.print("Volt/curs: ");
-    Serial.println(volt);
-    Serial.print("/");
-    Serial.println(volt_cursor);
-    Serial.println(bat_read);
-    Serial.println(bat_percent);
+//    Serial.print(F("Volt/curs: "));
+//    Serial.println(volt);
+//    Serial.print(F("/"));
+//    Serial.println(volt_cursor);
+//    Serial.println(bat_read);
+//    Serial.println(bat_percent);
 
 
     return bat_volt;
