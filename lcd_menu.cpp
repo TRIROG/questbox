@@ -22,7 +22,7 @@ void lcd_welcome(LiquidCrystal_I2C lcd){
     // Init battery voltage
     for(int i = 0; i < BATTERY_AVAREGE_COUNT; i++) get_battery_voltage_avg(analogRead(BATTERY_VOLTAGE_PIN));
     float bat_voltage = get_battery_voltage_avg(analogRead(BATTERY_VOLTAGE_PIN));
-    float bat_percent = (bat_voltage - 3.3)*111.1;
+    float bat_percent = (bat_voltage - 2.75)*111.1; //Shoukd be 3.3 but there is some voltage drop. It is temporary
 
     lcd.setCursor(0,1);
     lcd.print(F("Battery: "));
@@ -37,7 +37,7 @@ void lcd_distance_target1(LiquidCrystal_I2C lcd, double distance){
     lcd.print(F("Your next stop"));
     lcd.setCursor(0,1);
     lcd.print(F("is "));
-    lcd.print((int)distance);
+    lcd.print(distance);
     lcd.print(F(" "));
     lcd.print(F("m away..."));
 }

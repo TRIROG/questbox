@@ -7,7 +7,9 @@
 #include "lcd_menu.h"
 #include "EEPROM.h"
 #include "wait.h"
-#include "/home/vid/Arduino/libraries/MemoryFree/MemoryFree.h"
+//#include "/home/vid/Arduino/libraries/MemoryFree/MemoryFree.h"
+
+//#define SIMULATION
 
 TinyGPSPlus gps;
 //LiquidCrystal lcd(8, 10, 4, 5, 6, 7);
@@ -59,6 +61,12 @@ void setup()
     target_lat[3] = TARGET_3_LON;
     target_lon[4] = TARGET_4_LAT;
     target_lat[4] = TARGET_4_LON;
+    target_lon[5] = TARGET_5_LAT;
+    target_lat[5] = TARGET_5_LON;
+    target_lon[6] = TARGET_6_LAT;
+    target_lat[6] = TARGET_6_LON;
+    target_lon[7] = TARGET_7_LAT;
+    target_lat[7] = TARGET_7_LON;
 
     target = EEPROM.read(EEPROM_TARGET_INDEX);
     if(target > NUMBER_OF_TARGETS+2 || target == 0 /*|| TARGET_RESET > 0*/) {
@@ -77,6 +85,8 @@ void setup()
 
     digitalWrite(LCD_POWER_PIN, 1);
     digitalWrite(SERVO_ON_PIN, 0);
+
+    //analogReference(EXTERNAL);
 
     ss.begin(9600);
     Serial.begin(115200);
@@ -118,7 +128,6 @@ void loop()
 
     sats_fix = gps.satellites.value();
     hdop = gps.hdop.value();
-    distance = gps.distanceBetween(position_lat, position_lon, TARGET_1_LAT, TARGET_1_LON);
     position_lat = gps.location.lat();
     position_lon = gps.location.lng();
 
@@ -126,7 +135,17 @@ void loop()
     distance = gps.distanceBetween(position_lat, position_lon, target_lat[target], target_lon[target]);
     //distance = 4; // debug
 
-    if (distance > 30){
+    static int sim, ok;
+#ifdef SIMULATION
+    if (millis() > 30000 && millis() < 50000 && ok == 0){
+        sim = 1;
+    }
+    else sim = 0;
+
+    if (distance > 30 && sim == 0){
+#else
+    if (distance > 30) {
+#endif
         lcd_target(lcd, target, distance, sats_fix);
     }
     else {
@@ -150,6 +169,7 @@ void loop()
         if (but == 1){
             // Go to next target
             target++;
+            ok = 1;
 
             if(target > NUMBER_OF_TARGETS){
                 lcd.clear();
@@ -168,12 +188,12 @@ void loop()
     if(millis() > update_time + 1000){
         update_time = millis();
 
-//        Serial.println(gps.location.lat(), 6);
-//        Serial.print(F("LAT="));  Serial.println(gps.location.lat(), 6);
-//        Serial.print(F("LONG=")); Serial.println(gps.location.lng(), 6);
-//        Serial.print(F("ALT="));  Serial.println(gps.altitude.meters());
-//        Serial.print(F("hdop="));  Serial.println(hdop);
-//        Serial.print(F("sats="));  Serial.println(sats_fix);
+        Serial.println(gps.location.lat(), 6);
+        Serial.print(F("LAT="));  Serial.println(gps.location.lat(), 6);
+        Serial.print(F("LONG=")); Serial.println(gps.location.lng(), 6);
+        Serial.print(F("ALT="));  Serial.println(gps.altitude.meters());
+        Serial.print(F("hdop="));  Serial.println(hdop);
+        Serial.print(F("sats="));  Serial.println(sats_fix);
 
         if(hdop < 500 && sats_fix > 4){
             fix = 1;
@@ -331,7 +351,26 @@ float get_battery_voltage_avg(float bat_read){
     }
     bat_volt = bat_volt/BATTERY_AVAREGE_COUNT;
 
-    float bat_percent = (bat_volt - 3.3)*111.1;
+
+
+    //float bat_percent = (bat_volt - 3.3)*111.1;
+
+    float bat_percent = (bat_volt - 2.75)*111.1; //Shoukd be 3.3 but there is some voltage drop. It is temporary
+
+    if (bat_percent > 100) bat_percent = 100;
+    if (bat_percent < 0)   bat_percent = 0;
+
+    Serial.print(F("Bat voltage:")); Serial.println(bat_volt);
+    Serial.print(F("Bat percent:")); Serial.println(bat_percent);
+
+
+//    lcd.clear();
+
+//    //lcd.print(F("Analog:")); lcd.println(analogRead(BATTERY_VOLTAGE_PIN));
+//    lcd.print(F("Bat voltage:")); lcd.println(bat_volt);
+//    lcd.setCursor(0,1);
+//    lcd.print(F("Bat percent:")); lcd.println(bat_percent);
+//    delay(300);
 
 
 //    Serial.print(F("Volt/curs: "));
