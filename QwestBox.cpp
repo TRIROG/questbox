@@ -20,7 +20,7 @@ Servo servo;
 void secret_button();
 int distance2();
 void open_box();
-//void close_box();
+void close_box();
 void go_sleep(void);
 int distance2(double lat1, double lon1, double lat2, double lon2, unsigned long *dist);
 
@@ -98,9 +98,6 @@ void setup()
     lcd.backlight();
 
     lcd_welcome(lcd);
-    //lcd.print(F("   Quest Box  "));
-
-
 
     wait w;
     w.set_time(3000);
@@ -134,7 +131,7 @@ void loop()
     position_lat = gps.location.lat();
     position_lon = gps.location.lng();
 
-    target = 7; // debug
+    //target = 7; // debug
     distance = gps.distanceBetween(position_lat, position_lon, target_lat[target], target_lon[target]);
 
     //distance = 4; // debug
@@ -242,13 +239,11 @@ int step1()
     if(millis() > sleep_time + 300000) digitalWrite(ON_PIN, 0);
     if(gps_fix == 3) return 1;
     else return 0;
-
 }
 
 void open_box(){
     lcd_open_box(lcd);
     delay(4000);
-    servo.attach(9);
     servo.attach(SERVO_PIN);
     digitalWrite(SERVO_ON_PIN, 1);
     servo.write(DOOR_OPEN);
@@ -257,14 +252,15 @@ void open_box(){
     servo.detach();
 }
 
-//void close_box(){
-//    lcd.clear();
-//    lcd.print(F("  Locking box  "));
-//    delay(5000);
-//    servo.write(DOOR_CLOSED);
-//    delay(5000);
-//    servo.detach();
-//}
+void close_box(){
+    lcd.clear();
+    lcd.print(F("  Locking box  "));
+    servo.attach(SERVO_PIN);
+    delay(5000);
+    servo.write(DOOR_CLOSED);
+    delay(5000);
+    servo.detach();
+}
 
 
 void secret_button()
@@ -326,7 +322,7 @@ void secret_button()
                                             else {
                                                 open_box();
                                                 delay(15000);
-                                                //close_box();
+                                                close_box();
                                                 break;
                                             }
                                         }

@@ -76,7 +76,7 @@ void lcd_open_box(LiquidCrystal_I2C lcd){
 
 void lcd_box_open(LiquidCrystal_I2C lcd){
     lcd.clear();
-    lcd.print(F("  Box open "));
+    lcd.print(F("    Box open "));
 }
 
     wait wait_4_steps, wait_3_steps, wait_3, w4;
