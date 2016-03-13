@@ -3,6 +3,8 @@
 #include "wait.h"
 
 
+#define SIGNAL_THRES 5
+
 byte black_box[8] = {
   B00000,
   B10001,
@@ -31,7 +33,7 @@ void lcd_welcome(LiquidCrystal_I2C lcd){
     delay(3000);
 }
 
-void lcd_distance_target1(LiquidCrystal_I2C lcd, double distance){
+void lcd_distance_target1(LiquidCrystal_I2C lcd, unsigned long distance){
     //lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print(F("Your next stop"));
@@ -120,7 +122,7 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
             lcd.print(F("his seat."));
         }
         if(wait_4_steps.step() == 4 ){
-            if(signal > 5){
+            if(signal > SIGNAL_THRES){
                 lcd_distance_target1(lcd, distance);
             }
             else {
@@ -148,7 +150,7 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
             lcd.print(F("you will find."));
         }
         if(wait_4_steps.step() == 4 ){
-            if(signal > 5){
+            if(signal > SIGNAL_THRES){
                 lcd_distance_target1(lcd, distance);
             }
             else {
@@ -170,7 +172,7 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
             lcd.print(F("from this place."));
         }
         if(wait_3_steps.step() == 3 ){
-            if(signal > 5){
+            if(signal > SIGNAL_THRES){
                 lcd_distance_target1(lcd, distance);
             }
             else {
@@ -191,7 +193,7 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
             lcd.print(F("another bait."));
         }
         if(wait_3_steps.step() == 3 ){
-            if(signal > 5){
+            if(signal > SIGNAL_THRES){
                 lcd_distance_target1(lcd, distance);
             }
             else {
@@ -218,7 +220,7 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
             lcd.print(F(""));
             break;
         case 4:
-            if(signal > 5){
+            if(signal > SIGNAL_THRES){
                 lcd_distance_target1(lcd, distance);
             }
             else {
@@ -241,7 +243,7 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
             lcd.print(F("ask, do not fear"));
             break;
         case 3:
-            if(signal > 5){
+            if(signal > SIGNAL_THRES){
                 lcd_distance_target1(lcd, distance);
             }
             else {
@@ -269,7 +271,7 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
             lcd.print(F(" "));
             break;
         case 4:
-            if(signal > 5){
+            if(signal > SIGNAL_THRES){
                 lcd_distance_target1(lcd, distance);
             }
             else {

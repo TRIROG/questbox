@@ -20,13 +20,16 @@ Servo servo;
 void secret_button();
 int distance2();
 void open_box();
+//void close_box();
 void go_sleep(void);
+int distance2(double lat1, double lon1, double lat2, double lon2, unsigned long *dist);
 
 unsigned long lcd_time;
 unsigned long update_time = 0;
 unsigned long sleep_time = 0;
 double position_lat, position_lon;
-double d, distance;
+double d;
+unsigned long distance;
 int sats_view, sats_fix, gps_fix;
 long hdop;
 bool newData = false;
@@ -53,20 +56,20 @@ double target_lat[10];
 
 void setup()
 {
-    target_lon[1] = TARGET_1_LAT;
-    target_lat[1] = TARGET_1_LON;
-    target_lon[2] = TARGET_2_LAT;
-    target_lat[2] = TARGET_2_LON;
-    target_lon[3] = TARGET_3_LAT;
-    target_lat[3] = TARGET_3_LON;
-    target_lon[4] = TARGET_4_LAT;
-    target_lat[4] = TARGET_4_LON;
-    target_lon[5] = TARGET_5_LAT;
-    target_lat[5] = TARGET_5_LON;
-    target_lon[6] = TARGET_6_LAT;
-    target_lat[6] = TARGET_6_LON;
-    target_lon[7] = TARGET_7_LAT;
-    target_lat[7] = TARGET_7_LON;
+    target_lat[1] = TARGET_1_LAT;
+    target_lon[1] = TARGET_1_LON;
+    target_lat[2] = TARGET_2_LAT;
+    target_lon[2] = TARGET_2_LON;
+    target_lat[3] = TARGET_3_LAT;
+    target_lon[3] = TARGET_3_LON;
+    target_lat[4] = TARGET_4_LAT;
+    target_lon[4] = TARGET_4_LON;
+    target_lat[5] = TARGET_5_LAT;
+    target_lon[5] = TARGET_5_LON;
+    target_lat[6] = TARGET_6_LAT;
+    target_lon[6] = TARGET_6_LON;
+    target_lat[7] = TARGET_7_LAT;
+    target_lon[7] = TARGET_7_LON;
 
     target = EEPROM.read(EEPROM_TARGET_INDEX);
     if(target > NUMBER_OF_TARGETS+2 || target == 0 /*|| TARGET_RESET > 0*/) {
@@ -131,8 +134,9 @@ void loop()
     position_lat = gps.location.lat();
     position_lon = gps.location.lng();
 
-    //target = 7; // debug
+    target = 7; // debug
     distance = gps.distanceBetween(position_lat, position_lon, target_lat[target], target_lon[target]);
+
     //distance = 4; // debug
 
     static int sim, ok;
@@ -171,7 +175,7 @@ void loop()
             target++;
             ok = 1;
 
-            if(target > NUMBER_OF_TARGETS){
+            if(target >= NUMBER_OF_TARGETS){
                 lcd.clear();
                 lcd.setCursor(0, 0);
                 lcd.print(F("CONRATULATIONS! "));
@@ -204,10 +208,6 @@ void loop()
             fix = 0;
             strength = sats_fix;
             //lcd_gps_signal(lcd, strength);
-        }
-
-        if(distance < 50 && distance != 0){
-            //open_box();
         }
     }
 
@@ -253,13 +253,18 @@ void open_box(){
     digitalWrite(SERVO_ON_PIN, 1);
     servo.write(DOOR_OPEN);
     lcd_box_open(lcd);
-    lcd.clear();
-    lcd.print(F("    Box open "));
-    delay(20000);
-    servo.write(DOOR_CLOSED);
-    delay(3000);
+    delay(5000);
     servo.detach();
 }
+
+//void close_box(){
+//    lcd.clear();
+//    lcd.print(F("  Locking box  "));
+//    delay(5000);
+//    servo.write(DOOR_CLOSED);
+//    delay(5000);
+//    servo.detach();
+//}
 
 
 void secret_button()
@@ -320,6 +325,8 @@ void secret_button()
                                             }
                                             else {
                                                 open_box();
+                                                delay(15000);
+                                                //close_box();
                                                 break;
                                             }
                                         }
@@ -334,6 +341,28 @@ void secret_button()
     }
 }
 
+
+int distance2(double lat1, double lon1, double lat2, double lon2, unsigned long *dist)
+{
+  if(lat1 != 0 && lon1 != 0){
+    double deg_to_rad =  3.14/180;
+
+    double R = 6371000; // metres
+    double fi1 = lat1 * deg_to_rad;
+    double fi2 = lat2  * deg_to_rad;
+    double delta_fi = (lat2-lat1) * deg_to_rad;
+    double delta_lambda = (lon2-lon1) * deg_to_rad;
+
+    double a = sin(delta_fi/2) * sin(delta_fi/2) +
+               cos(fi1) * cos(fi2) *
+               sin(delta_lambda/2) * sin(delta_lambda/2);
+
+    d = R * ( 2 * atan2(sqrt(a), sqrt(1-a)) );
+    *dist = d;
+    return d;
+  }
+  else return -1;
+}
 
 float get_battery_voltage_avg(float bat_read){
     float volt = bat_read*5/1023;
