@@ -77,6 +77,10 @@ void setup()
         EEPROM.write(EEPROM_TARGET_INDEX, target);
     }
 
+    // Force next step on strtup
+    //target++;
+    //EEPROM.write(EEPROM_TARGET_INDEX, target);
+
     // Init pin outputs
     pinMode(BATTERY_VOLTAGE_PIN, INPUT);
     pinMode(BUTTON_PIN, INPUT);
@@ -131,7 +135,7 @@ void loop()
     position_lat = gps.location.lat();
     position_lon = gps.location.lng();
 
-    //target = 7; // debug
+    //target = 3; // debug
     distance = gps.distanceBetween(position_lat, position_lon, target_lat[target], target_lon[target]);
 
     //distance = 4; // debug

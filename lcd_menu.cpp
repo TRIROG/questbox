@@ -15,6 +15,8 @@ byte black_box[8] = {
   B00000,
 };
 
+wait wait_4_steps, wait_3_steps;
+
 
 void lcd_welcome(LiquidCrystal_I2C lcd){
     lcd.clear();
@@ -54,7 +56,6 @@ void lcd_gps_signal(LiquidCrystal_I2C lcd, unsigned int strength){
         //lcd.write(byte(0));
     }
 
-    //lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print(F("   GPS signal"));
     lcd.setCursor(0,1);
@@ -65,7 +66,6 @@ void lcd_gps_signal(LiquidCrystal_I2C lcd, unsigned int strength){
 }
 
 
-
 void lcd_open_box(LiquidCrystal_I2C lcd){
     lcd.clear();
     lcd.setCursor(0, 0);
@@ -74,23 +74,17 @@ void lcd_open_box(LiquidCrystal_I2C lcd){
     lcd.print(F(" Stand clear... "));
 }
 
+
 void lcd_box_open(LiquidCrystal_I2C lcd){
     lcd.clear();
     lcd.print(F("    Box open "));
 }
 
-    wait wait_4_steps, wait_3_steps, wait_3, w4;
-
 
 void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, unsigned int signal){
 
-    unsigned long ts;
-    unsigned int step;
-
-     wait_4_steps.set_steps(4);
-     wait_3_steps.set_steps(3);
-     wait_3.set_steps(4);
-   //  wait_4.set_steps(3);
+    wait_4_steps.set_steps(4);
+    wait_3_steps.set_steps(3);
 
     static unsigned int wait_temp;
     if (wait_temp != wait_4_steps.step()){
@@ -108,9 +102,7 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
             lcd.setCursor(0, 0);
             lcd.print(F("A dragon you")); lcd.setCursor(0,1);
             lcd.print(F("will meet,"));
-            wait_3_steps.start(SCREEN_DELAY_DEFAULT);
         }
-        //delay(SCREEN_DELAY_DEFAULT);
         if(wait_4_steps.step() == 2 ){
             lcd.setCursor(0, 0);
             lcd.print(F("above the")); lcd.setCursor(0,1);
@@ -136,9 +128,7 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
             lcd.setCursor(0, 0);
             lcd.print(F("A house by the")); lcd.setCursor(0,1);
             lcd.print(F("church you"));
-            wait_3_steps.start(SCREEN_DELAY_DEFAULT);
         }
-        //delay(SCREEN_DELAY_DEFAULT);
         if(wait_4_steps.step() == 2 ){
             lcd.setCursor(0, 0);
             lcd.print(F("should mind,")); lcd.setCursor(0,1);
@@ -163,9 +153,7 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
             lcd.setCursor(0, 0);
             lcd.print(F("Find a")); lcd.setCursor(0,1);
             lcd.print(F("golden face,"));
-            wait_3_steps.start(SCREEN_DELAY_DEFAULT);
         }
-        //delay(SCREEN_DELAY_DEFAULT);
         if(wait_3_steps.step() == 2 ){
             lcd.setCursor(0, 0);
             lcd.print(F("Twenty steps")); lcd.setCursor(0,1);
@@ -185,7 +173,6 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
             lcd.setCursor(0, 0);
             lcd.print(F("Dragons at the")); lcd.setCursor(0,1);
             lcd.print(F("river wait,"));
-            wait_3_steps.start(SCREEN_DELAY_DEFAULT);
         }
         if(wait_3_steps.step() == 2 ){
             lcd.setCursor(0, 0);
@@ -207,7 +194,6 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
             lcd.setCursor(0, 0);
             lcd.print(F("To the fountain")); lcd.setCursor(0,1);
             lcd.print(F("you must go"));
-            wait_3_steps.start(SCREEN_DELAY_DEFAULT);
             break;
         case 2:
             lcd.setCursor(0, 0);
@@ -235,7 +221,6 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
             lcd.setCursor(0, 0);
             lcd.print(F("Dragon bridge")); lcd.setCursor(0,1);
             lcd.print(F("is near, If you"));
-            wait_3_steps.start(SCREEN_DELAY_DEFAULT);
             break;
         case 2:
             lcd.setCursor(0, 0);
@@ -258,7 +243,6 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
             lcd.setCursor(0, 0);
             lcd.print(F("Under the bridge")); lcd.setCursor(0,1);
             lcd.print(F("is a palm tree,"));
-            wait_3_steps.start(SCREEN_DELAY_DEFAULT);
             break;
         case 2:
             lcd.setCursor(0, 0);
