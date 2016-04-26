@@ -8,3 +8,4 @@ lcd_menu.cpp
 QwestBox.pro
 wait.h
 wait.cpp
+version.sh

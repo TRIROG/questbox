@@ -12,6 +12,9 @@ ARDUINO_PORT = /dev/ttyUSB0
 
 ARDMK_DIR = /home/vid/Arduino/Arduino-Makefile-master
 
+GIT_VERSION_LONG=$(shell echo $(git describe --abbrev=4 --dirty --always --tags)-$(git symbolic-ref --short HEAD)-$(date +%s))
+GIT_VERSION_SHORT=$(shell echo $(git describe --abbrev=4 --dirty --always --tags))
+
 
 
 include $(ROOT_DIR)/Arduino.mk

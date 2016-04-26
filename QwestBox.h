@@ -9,29 +9,71 @@
 
 #include "Arduino.h"
 
-#define NUMBER_OF_TARGETS 7
+//#include "FastSerial/FastSerial.h"
+#include "HardwareSerial.h"
+
+#define NUMBER_OF_TARGETS 14
 #define TARGET_RESET 0
 
-#define TARGET_1_LAT 46.047716
-#define TARGET_1_LON 14.509190
 
-#define TARGET_2_LAT 46.046268
-#define TARGET_2_LON 14.508479
 
-#define TARGET_3_LAT 46.047012
-#define TARGET_3_LON 14.503804
+// Lutkovno gledalisce
+#define TARGET_1_LAT 46.050491
+#define TARGET_1_LON 14.510204
 
-#define TARGET_4_LAT 46.047815
-#define TARGET_4_LON 14.505000
 
-#define TARGET_5_LAT 46.050886
-#define TARGET_5_LON 14.506384
+// Vhod na grad
+#define TARGET_2_LAT 46.047716
+#define TARGET_2_LON 14.509190
 
-#define TARGET_6_LAT 46.050595
-#define TARGET_6_LON 14.508322
+// Cerkev sveteg Florjana
+#define TARGET_3_LAT 46.046268
+#define TARGET_3_LON 14.508479
 
-#define TARGET_7_LAT 46.052025
-#define TARGET_7_LON 14.508843
+// Kip
+#define TARGET_4_LAT 46.046011
+#define TARGET_4_LON 14.5086
+
+// Trg FR
+#define TARGET_5_LAT 46.047012
+#define TARGET_5_LON 14.503804
+
+// Napoleonov kip
+#define TARGET_6_LAT 46.046995
+#define TARGET_6_LON 14.502988
+
+// Zlata ladnjica
+#define TARGET_7_LAT 46.047834
+#define TARGET_7_LON 14.505365
+
+// Sustrski most
+#define TARGET_8_LAT 46.0484
+#define TARGET_8_LON 14.505402
+
+// Presernov trg
+#define TARGET_9_LAT 46.051317
+#define TARGET_9_LON 14.506129
+
+// Rotovz
+#define TARGET_10_LAT 46.05009
+#define TARGET_10_LON 14.507009
+
+// Stolnica
+#define TARGET_11_LAT 46.050555
+#define TARGET_11_LON 14.508158
+
+// Zmajski most
+#define TARGET_12_LAT 46.051736
+#define TARGET_12_LON 14.510461
+
+// Mesarski most (Petkovsek 1)
+#define TARGET_13_LAT 46.052001
+#define TARGET_13_LON 14.509192
+
+// Petkovsek 2 (Konec)
+#define TARGET_14_LAT 46.051741
+#define TARGET_14_LON 14.508149
+
 
 
 #define LCD_BACKLIGHT_TIME 3000

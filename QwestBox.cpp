@@ -10,10 +10,11 @@
 //#include "/home/vid/Arduino/libraries/MemoryFree/MemoryFree.h"
 
 //#define SIMULATION
+//#define BUTTON_FOR_NEXT_STEP
 
 TinyGPSPlus gps;
 //LiquidCrystal lcd(8, 10, 4, 5, 6, 7);
-LiquidCrystal_I2C lcd(0x27,16,2);
+LiquidCrystal_I2C lcd(0x3E,16,2);
 SoftwareSerial ss(4, 5);
 Servo servo;
 
@@ -42,8 +43,8 @@ bool fix = 0;
 int strength;
 unsigned int target;
 
-double target_lon[10];
-double target_lat[10];
+double target_lon[20];
+double target_lat[20];
 
  extern int __heap_start, *__brkval;
 
@@ -70,6 +71,20 @@ void setup()
     target_lon[6] = TARGET_6_LON;
     target_lat[7] = TARGET_7_LAT;
     target_lon[7] = TARGET_7_LON;
+    target_lat[8] = TARGET_8_LAT;
+    target_lon[8] = TARGET_8_LON;
+    target_lat[9] = TARGET_9_LAT;
+    target_lon[9] = TARGET_9_LON;
+    target_lat[10] = TARGET_10_LAT;
+    target_lon[10] = TARGET_10_LON;
+    target_lat[11] = TARGET_11_LAT;
+    target_lon[11] = TARGET_11_LON;
+    target_lat[12] = TARGET_12_LAT;
+    target_lon[12] = TARGET_12_LON;
+    target_lat[13] = TARGET_13_LAT;
+    target_lon[13] = TARGET_13_LON;
+    target_lat[14] = TARGET_14_LAT;
+    target_lon[14] = TARGET_14_LON;
 
     target = EEPROM.read(EEPROM_TARGET_INDEX);
     if(target > NUMBER_OF_TARGETS+2 || target == 0 /*|| TARGET_RESET > 0*/) {
@@ -118,17 +133,26 @@ void setup()
 
 void loop()
 {
-    //Serial.print(F("Free RAM:"));    Serial.println(freeRam());
+    //Serial.print(F("Free RAM1:"));    Serial.println(freeRam());
 
     // Check secret button
     but = !digitalRead(ON_PIN);
     if(but){
+        Serial.println(F("Button pressed"));
         secret_button();
     }
 
+    bool GPS_debug = 0;
     unsigned long t = millis();
-    while (ss.available() > 0 || t + 1100 < millis())
+    while (ss.available() > 0 || t + 1100 < millis()){
         gps.encode(ss.read());
+        GPS_debug = 1;
+    }
+    if (GPS_debug) {
+        Serial.println(F("GPS received"));
+        GPS_debug = 0;
+    }
+
 
     sats_fix = gps.satellites.value();
     hdop = gps.hdop.value();
@@ -142,10 +166,15 @@ void loop()
 
     static int sim, ok;
 #ifdef SIMULATION
-    if (millis() > 30000 && millis() < 50000 && ok == 0){
+    if (but == 1){
         sim = 1;
+        delay (1000);
     }
-    else sim = 0;
+    else {
+        sim = 0;
+        lcd.setCursor(14, 1);
+        lcd.print(target);
+    }
 
     if (distance > 30 && sim == 0){
 #else
@@ -154,6 +183,8 @@ void loop()
         lcd_target(lcd, target, distance, sats_fix);
     }
     else {
+
+#ifdef BUTTON_FOR_NEXT_STEP
         wait finish;
         finish.set_time(2500);
         finish.set_steps(2);
@@ -176,18 +207,31 @@ void loop()
             target++;
             ok = 1;
 
-            if(target >= NUMBER_OF_TARGETS){
-                lcd.clear();
-                lcd.setCursor(0, 0);
-                lcd.print(F("CONRATULATIONS! "));
-                delay(5000);
-                open_box();
-            }
-            else {
-                EEPROM.write(EEPROM_TARGET_INDEX, target);
-            }
+
 
         }
+#else
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print(F("You are at your "));
+        lcd.setCursor(0, 1);
+        lcd.print(F("current target."));
+        target++;
+        delay(5000);
+        but = 0;
+#endif
+        // Open the box at the end of game
+        if(target > NUMBER_OF_TARGETS){
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print(F("CONRATULATIONS! "));
+            delay(5000);
+            open_box();
+        }
+        else {
+            EEPROM.write(EEPROM_TARGET_INDEX, target);
+        }
+
     }
 
     if(millis() > update_time + 1000){
@@ -203,7 +247,6 @@ void loop()
         if(hdop < 500 && sats_fix > 4){
             fix = 1;
             distance = gps.distanceBetween(position_lat, position_lon, TARGET_1_LAT, TARGET_1_LON);
-
         }
         else{
             fix = 0;
@@ -264,6 +307,7 @@ void close_box(){
     servo.write(DOOR_CLOSED);
     delay(5000);
     servo.detach();
+    digitalWrite(SERVO_ON_PIN, 0);
 }
 
 
