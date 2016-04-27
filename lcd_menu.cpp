@@ -24,11 +24,15 @@ void lcd_welcome(LiquidCrystal_I2C lcd){
     lcd.setCursor(0, 0);
     lcd.print(F("   Quest Box  "));
 
+
+//    lcd.clear();
+
     float bat_voltage;
 
+//    while (1){
     for (int i = 0; i <= BATTERY_AVAREGE_COUNT; i++)
         bat_voltage = get_battery_voltage_avg(analogRead(BATTERY_VOLTAGE_PIN));
-    float bat_percent = (bat_voltage - 3.3)*125; //Use 2.75 on first box
+    float bat_percent = (bat_voltage - 3.3)*111.1; //Use 2.75 on first box
 
     if(bat_percent > 100) bat_percent = 100;
     if(bat_percent < 0 ) bat_percent = 0;
@@ -39,7 +43,7 @@ void lcd_welcome(LiquidCrystal_I2C lcd){
     lcd.print((int)bat_percent);
     lcd.print("% ");
     lcd.print( bat_voltage);
-    lcd.print("V   ");
+    lcd.print("V");
 
     lcd.print((int)bat_percent);
 

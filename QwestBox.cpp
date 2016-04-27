@@ -444,35 +444,13 @@ float get_battery_voltage_avg(float bat_read){
     }
     bat_volt = bat_volt/BATTERY_AVAREGE_COUNT;
 
-
-
-    //float bat_percent = (bat_volt - 3.3)*111.1;
-
-    float bat_percent = (bat_volt - 2.75)*111.1; //Shoukd be 3.3 but there is some voltage drop. It is temporary
+    float bat_percent = (bat_volt - 2.75)*111.1;
 
     if (bat_percent > 100) bat_percent = 100;
     if (bat_percent < 0)   bat_percent = 0;
 
     Serial.print(F("Bat voltage:")); Serial.println(bat_volt);
     Serial.print(F("Bat percent:")); Serial.println(bat_percent);
-
-
-//    lcd.clear();
-
-//    //lcd.print(F("Analog:")); lcd.println(analogRead(BATTERY_VOLTAGE_PIN));
-//    lcd.print(F("Bat voltage:")); lcd.println(bat_volt);
-//    lcd.setCursor(0,1);
-//    lcd.print(F("Bat percent:")); lcd.println(bat_percent);
-//    delay(300);
-
-
-//    Serial.print(F("Volt/curs: "));
-//    Serial.println(volt);
-//    Serial.print(F("/"));
-//    Serial.println(volt_cursor);
-//    Serial.println(bat_read);
-//    Serial.println(bat_percent);
-
 
     return bat_volt;
 }
