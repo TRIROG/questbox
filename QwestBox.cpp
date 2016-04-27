@@ -113,7 +113,7 @@ void setup()
 
     servo.attach(SERVO_PIN);
 
-    //analogReference(EXTERNAL);
+    analogReference(EXTERNAL);
 
     ss.begin(9600);
     Serial.begin(115200);

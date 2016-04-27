@@ -24,16 +24,26 @@ void lcd_welcome(LiquidCrystal_I2C lcd){
     lcd.setCursor(0, 0);
     lcd.print(F("   Quest Box  "));
 
-    // Init battery voltage
-    for(int i = 0; i < BATTERY_AVAREGE_COUNT; i++) get_battery_voltage_avg(analogRead(BATTERY_VOLTAGE_PIN));
-    float bat_voltage = get_battery_voltage_avg(analogRead(BATTERY_VOLTAGE_PIN));
-    float bat_percent = (bat_voltage - 3.3)*111.1; //Shoukd be 3.3 but there is some voltage drop. It is temporary
+    float bat_voltage;
+
+    for (int i = 0; i <= BATTERY_AVAREGE_COUNT; i++)
+        bat_voltage = get_battery_voltage_avg(analogRead(BATTERY_VOLTAGE_PIN));
+    float bat_percent = (bat_voltage - 3.3)*125; //Use 2.75 on first box
+
+    if(bat_percent > 100) bat_percent = 100;
+    if(bat_percent < 0 ) bat_percent = 0;
 
     lcd.setCursor(0,1);
-    lcd.print(F("Battery: "));
+    lcd.print(F("Batt: "));
+
     lcd.print((int)bat_percent);
-    lcd.print(F("%"));
-    delay(3000);
+    lcd.print("% ");
+    lcd.print( bat_voltage);
+    lcd.print("V   ");
+
+    lcd.print((int)bat_percent);
+
+    delay(4000);
 }
 
 void lcd_distance_target1(LiquidCrystal_I2C lcd, unsigned long distance){
