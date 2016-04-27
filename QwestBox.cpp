@@ -4,6 +4,7 @@
 #include "TinyGPS++.h"
 #include <SoftwareSerial.h>
 #include <Servo.h>
+#include <PWMServo.h>
 #include "lcd_menu.h"
 #include "EEPROM.h"
 #include "wait.h"
@@ -14,9 +15,11 @@
 
 TinyGPSPlus gps;
 //LiquidCrystal lcd(8, 10, 4, 5, 6, 7);
-LiquidCrystal_I2C lcd(0x3E,16,2);
+LiquidCrystal_I2C lcd(0x3F,16,2);
 SoftwareSerial ss(4, 5);
-Servo servo;
+
+//Servo servo;
+PWMServo servo;
 
 void secret_button();
 int distance2();
@@ -107,6 +110,8 @@ void setup()
 
     digitalWrite(LCD_POWER_PIN, 1);
     digitalWrite(SERVO_ON_PIN, 0);
+
+    servo.attach(SERVO_PIN);
 
     //analogReference(EXTERNAL);
 
@@ -256,16 +261,15 @@ void loop()
     }
 
     if(millis() > sleep_time + SLEEP_TIME_MS){
-        lcd.clear();
-        lcd.print(F("Going to sleep.."));
-        delay(2000);
-
         go_sleep();
     }
 }
 
 void go_sleep(void)
 {
+    lcd.clear();
+    lcd.print(F("Going to sleep.."));
+    delay(2000);
     pinMode(ON_PIN, OUTPUT);
     digitalWrite(ON_PIN, 0);
 }
@@ -291,22 +295,32 @@ int step1()
 void open_box(){
     lcd_open_box(lcd);
     delay(4000);
-    servo.attach(SERVO_PIN);
+    lcd_box_open(lcd);
     digitalWrite(SERVO_ON_PIN, 1);
     servo.write(DOOR_OPEN);
-    lcd_box_open(lcd);
     delay(5000);
-    servo.detach();
+    //servo.detach();
+    digitalWrite(SERVO_ON_PIN, 0);
+
 }
 
 void close_box(){
     lcd.clear();
     lcd.print(F("  Locking box  "));
-    servo.attach(SERVO_PIN);
+    Serial.println(F("Locking box"));
+   // servo.attach(SERVO_PIN);
+    digitalWrite(SERVO_ON_PIN, 1);
     delay(5000);
     servo.write(DOOR_CLOSED);
-    delay(5000);
-    servo.detach();
+
+
+    delay(1000);
+
+
+
+
+   // delay(5000);
+    //servo.detach();
     digitalWrite(SERVO_ON_PIN, 0);
 }
 
@@ -314,8 +328,14 @@ void close_box(){
 void secret_button()
 {
     static unsigned long but1;
+    but1 = millis();
     Serial.println(F("1"));
-    while(!digitalRead(ON_PIN)){delay(20);}
+    while(!digitalRead(ON_PIN)){
+        delay(20);
+        if (millis() > but1 + 5000){
+            go_sleep();
+        }
+    }
     but1 = millis();
     while(millis() < but1 + BUTTON1_DELAY){delay(20);
         if(!digitalRead(ON_PIN)){
