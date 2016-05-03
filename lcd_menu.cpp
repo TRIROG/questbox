@@ -364,41 +364,13 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
 #else
 void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, unsigned int signal){
 
-    step.set_steps(4);
-
-    static unsigned int wait_temp;
-    if (wait_temp != wait_4_steps.step()){
-        lcd.clear();
-        wait_temp = wait_4_steps.step();
+    if(signal > SIGNAL_THRES){
+        lcd_distance_target1(lcd, distance);
+    }
+    else {
+        lcd_gps_signal(lcd, signal);
     }
 
-    int stp  = step.step();
-
-    switch (stp){
-    case 1:
-        lcd.setCursor(0, 0);
-        lcd.print(F("Under the bridge")); lcd.setCursor(0,1);
-        lcd.print(F("is a palm tree,"));
-        break;
-    case 2:
-        lcd.setCursor(0, 0);
-        lcd.print(F("there you")); lcd.setCursor(0,1);
-        lcd.print(F("will find"));
-        break;
-    case 3:
-        lcd.setCursor(0, 0);
-        lcd.print(F("numbers three.")); lcd.setCursor(0,1);
-        lcd.print(F(" "));
-        break;
-    case 4:
-        if(signal > SIGNAL_THRES){
-            lcd_distance_target1(lcd, distance);
-        }
-        else {
-            lcd_gps_signal(lcd, signal);
-        }
-        break;
-    }
 }
 
 #endif

@@ -50,6 +50,8 @@ unsigned int target;
 
 double target_lon[20];
 double target_lat[20];
+double single_target_lat;
+double single_target_lon;
 
  extern int __heap_start, *__brkval;
 
@@ -168,8 +170,11 @@ void loop()
     position_lon = gps.location.lng();
 
     //target = 3; // debug
+#ifdef MULTIPLE_TARGETS
     distance = gps.distanceBetween(position_lat, position_lon, target_lat[target], target_lon[target]);
-
+#else
+    distance = gps.distanceBetween(position_lat, position_lon, single_target_lat, single_target_lon);
+#endif
     //distance = 4; // debug
 
     static int sim, ok;
@@ -334,8 +339,8 @@ void serial_receive(){
 
                         if (_inByte == '$'){
                             Serial.println(F("Received OK"));
-                            target_lat[1] = _lat;
-                            target_lon[1] = _lon;
+                            single_target_lat = _lat;
+                            single_target_lon = _lon;
 
                         }
                         else {

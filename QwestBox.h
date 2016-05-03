@@ -12,6 +12,7 @@
 //#include "FastSerial/FastSerial.h"
 #include "HardwareSerial.h"
 
+//#define MULTIPLE_TRAGETS
 #define NUMBER_OF_TARGETS 14
 #define TARGET_RESET 0
 
