@@ -2,8 +2,6 @@
 #include "QwestBox.h"
 #include "wait.h"
 
-
-
 #define SIGNAL_THRES 4
 
 byte black_box[8] = {
@@ -16,20 +14,15 @@ byte black_box[8] = {
   B00000,
 };
 
-wait wait_4_steps, wait_3_steps, wait_0_steps;
-
+wait wait_4_steps, wait_3_steps, wait_0_steps, step;
 
 void lcd_welcome(LiquidCrystal_I2C lcd){
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print(F("   Quest Box  "));
 
-
-//    lcd.clear();
-
     float bat_voltage;
 
-//    while (1){
     for (int i = 0; i <= BATTERY_AVAREGE_COUNT; i++)
         bat_voltage = get_battery_voltage_avg(analogRead(BATTERY_VOLTAGE_PIN));
     float bat_percent = (bat_voltage - 3.3)*111.1; //Use 2.75 on first box
@@ -43,7 +36,7 @@ void lcd_welcome(LiquidCrystal_I2C lcd){
     lcd.print((int)bat_percent);
     lcd.print("% ");
     lcd.print( bat_voltage);
-    lcd.print("V");
+    lcd.print("V   ");
 
     lcd.print((int)bat_percent);
 
@@ -96,7 +89,7 @@ void lcd_box_open(LiquidCrystal_I2C lcd){
 
 #define STEP_1 wait_4_steps.step()
 
-
+#ifdef MULTIPLE_TARGETS
 void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, unsigned int signal){
 
     wait_4_steps.set_steps(4);
@@ -367,6 +360,48 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
         break;
     }
 }
+
+#else
+void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, unsigned int signal){
+
+    step.set_steps(4);
+
+    static unsigned int wait_temp;
+    if (wait_temp != wait_4_steps.step()){
+        lcd.clear();
+        wait_temp = wait_4_steps.step();
+    }
+
+    int stp  = step.step();
+
+    switch (stp){
+    case 1:
+        lcd.setCursor(0, 0);
+        lcd.print(F("Under the bridge")); lcd.setCursor(0,1);
+        lcd.print(F("is a palm tree,"));
+        break;
+    case 2:
+        lcd.setCursor(0, 0);
+        lcd.print(F("there you")); lcd.setCursor(0,1);
+        lcd.print(F("will find"));
+        break;
+    case 3:
+        lcd.setCursor(0, 0);
+        lcd.print(F("numbers three.")); lcd.setCursor(0,1);
+        lcd.print(F(" "));
+        break;
+    case 4:
+        if(signal > SIGNAL_THRES){
+            lcd_distance_target1(lcd, distance);
+        }
+        else {
+            lcd_gps_signal(lcd, signal);
+        }
+        break;
+    }
+}
+
+#endif
 
 
 

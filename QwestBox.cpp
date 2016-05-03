@@ -27,6 +27,8 @@ void open_box();
 void close_box();
 void go_sleep(void);
 int distance2(double lat1, double lon1, double lat2, double lon2, unsigned long *dist);
+void serial_receive();
+
 
 unsigned long lcd_time;
 unsigned long update_time = 0;
@@ -138,6 +140,7 @@ void setup()
 
 void loop()
 {
+    serial_receive();
     //Serial.print(F("Free RAM1:"));    Serial.println(freeRam());
 
     // Check secret button
@@ -262,6 +265,87 @@ void loop()
 
     if(millis() > sleep_time + SLEEP_TIME_MS){
         go_sleep();
+    }
+}
+
+void serial_receive(){
+
+    char _inByte;
+    String _data;
+    float _lat, _lon;
+
+
+//    do {
+
+
+//    }
+
+
+    while (Serial.available() > 0) {
+        delay(200);
+
+
+        // get incoming byte:
+        //_inByte = Serial.read();
+        if(Serial.read() == '#'){
+            if(Serial.read() == '#'){
+                if((unsigned char)Serial.read() == '#'){
+                    Serial.println(F("Reading lattitude"));
+                    _inByte = Serial.read();
+                    while (Serial.available()) {
+
+                        if(_inByte != '#'){
+                             Serial.write(_inByte);
+                            _data.concat(_inByte);
+                         }
+                        else {
+                            Serial.println();
+                            Serial.print(F("Got lattitude: "));
+                            Serial.println(_data);
+                            break;
+                        }
+                        _inByte = Serial.read();
+                    }
+
+                    _lat = _data.toFloat();
+                    Serial.print(F("Received lat: ")); Serial.println(_lat, 6);
+
+                    _data = "";
+
+                    _inByte = Serial.read();
+                    while (Serial.available()) {
+
+                        if(_inByte != '$'){
+                            Serial.write(_inByte);
+                            _data.concat(_inByte);
+                        }
+                        else {
+                            Serial.println();
+                            Serial.print(F("Got longitude: "));
+                            Serial.println(_data);
+                            break;
+                        }
+                        _inByte = Serial.read();
+                    }
+
+                    _lon = _data.toFloat();
+                    Serial.print(F("Received lon: ")); Serial.println(_lon, 6);
+
+                    if (_inByte == '$'){
+                        Serial.println(F("Received OK"));
+                    }
+                    else {
+                        Serial.print(F("Unrecognised char4: ")); Serial.println(_inByte);
+                    }
+                } else {
+                    Serial.print(F("Unrecognised char3: ")); Serial.println(_inByte);
+                }
+            } else {
+                Serial.print(F("Unrecognised char2: ")); Serial.println(_inByte);
+            }
+        } else {
+            Serial.print(F("Unrecognised char1: ")); Serial.println(_inByte);
+        }
     }
 }
 
