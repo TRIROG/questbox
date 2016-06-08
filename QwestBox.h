@@ -13,7 +13,7 @@
 #include "HardwareSerial.h"
 
 //#define MULTIPLE_TRAGETS
-#define NUMBER_OF_TARGETS 14
+#define NUMBER_OF_TARGETS 16
 #define TARGET_RESET 0
 
 
@@ -22,58 +22,65 @@
 #define TARGET_1_LAT 46.050491
 #define TARGET_1_LON 14.510204
 
-
 // Vhod na grad
-#define TARGET_2_LAT 46.047716
-#define TARGET_2_LON 14.509190
+#define TARGET_2_LAT 46.049002
+#define TARGET_2_LON 14.509228
+
+// Grajska kapela
+#define TARGET_3_LAT 46.048726
+#define TARGET_3_LON 14.508136
 
 // Cerkev sveteg Florjana
-#define TARGET_3_LAT 46.046268
-#define TARGET_3_LON 14.508479
+#define TARGET_4_LAT 46.046295
+#define TARGET_4_LON 14.508601
 
 // Kip
-#define TARGET_4_LAT 46.046011
-#define TARGET_4_LON 14.5086
+#define TARGET_5_LAT 46.045982
+#define TARGET_5_LON 14.508714
+
+// Krakovski most
+#define TARGET_6_LAT 46.045970
+#define TARGET_6_LON 14.505322
 
 // Trg FR
-#define TARGET_5_LAT 46.047012
-#define TARGET_5_LON 14.503804
+#define TARGET_7_LAT 46.047012
+#define TARGET_7_LON 14.503804
 
 // Napoleonov kip
-#define TARGET_6_LAT 46.046995
-#define TARGET_6_LON 14.502988
+#define TARGET_8_LAT 46.047106
+#define TARGET_8_LON 14.503012
 
 // Zlata ladnjica
-#define TARGET_7_LAT 46.047834
-#define TARGET_7_LON 14.505365
+#define TARGET_9_LAT 46.047834
+#define TARGET_9_LON 14.505365
 
-// Sustrski most
-#define TARGET_8_LAT 46.0484
-#define TARGET_8_LON 14.505402
+// Sustarski most
+#define TARGET_10_LAT 46.0484
+#define TARGET_10_LON 14.505402
 
 // Presernov trg
-#define TARGET_9_LAT 46.051317
-#define TARGET_9_LON 14.506129
+#define TARGET_11_LAT 46.051317
+#define TARGET_11_LON 14.506129
 
 // Rotovz
-#define TARGET_10_LAT 46.05009
-#define TARGET_10_LON 14.507009
+#define TARGET_12_LAT 46.05009
+#define TARGET_12_LON 14.507009
 
 // Stolnica
-#define TARGET_11_LAT 46.050555
-#define TARGET_11_LON 14.508158
+#define TARGET_13_LAT 46.050555
+#define TARGET_13_LON 14.508158
 
 // Zmajski most
-#define TARGET_12_LAT 46.051736
-#define TARGET_12_LON 14.510461
+#define TARGET_14_LAT 46.051736
+#define TARGET_14_LON 14.510461
 
-// Mesarski most (Petkovsek 1)
-#define TARGET_13_LAT 46.052001
-#define TARGET_13_LON 14.509192
+// Mesarski most
+#define TARGET_15_LAT 46.052001
+#define TARGET_15_LON 14.509192
 
-// Petkovsek 2 (Konec)
-#define TARGET_14_LAT 46.051741
-#define TARGET_14_LON 14.508149
+// Petkovsek
+#define TARGET_16_LAT 46.051741
+#define TARGET_16_LON 14.508149
 
 
 //#define DEBUG
@@ -96,6 +103,8 @@
 #define EEPROM_INDEX_LAT 20
 #define EEPROM_INDEX_LON 30
 #define EEPROM_INDEX_RAD 40
+#define DO_LOCK          1
+#define DONT_LOCK        0
 
 
 //float bat_voltage;

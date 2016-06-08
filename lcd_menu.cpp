@@ -5,13 +5,13 @@
 #define SIGNAL_THRES 4
 
 byte black_box[8] = {
-  B00000,
-  B10001,
-  B00000,
-  B00000,
-  B10001,
-  B01110,
-  B00000,
+    B00000,
+    B10001,
+    B00000,
+    B00000,
+    B10001,
+    B01110,
+    B00000,
 };
 
 wait wait_4_steps, wait_3_steps, wait_0_steps, step;
@@ -46,7 +46,7 @@ void lcd_welcome(LiquidCrystal_I2C lcd){
 void lcd_distance_target1(LiquidCrystal_I2C lcd, unsigned long distance){
     //lcd.clear();
     lcd.setCursor(0, 0);
-#ifdef MULTIPLE_TARGETS
+#ifdef MULTIPLE_TRAGETS
     lcd.print(F("Your next stop"));
 #else
     lcd.print(F("Your target"));
@@ -68,7 +68,7 @@ void lcd_gps_signal(LiquidCrystal_I2C lcd, unsigned int strength){
         //lcd.write(byte(0));
     }
     lcd.setCursor(0, 0);
-    lcd.print(F("   GPS signal"));
+    lcd.print(F("   GPS signal   "));
     lcd.setCursor(0,1);
     lcd.print(F("["));
     lcd.print(bar);
@@ -92,7 +92,7 @@ void lcd_box_open(LiquidCrystal_I2C lcd){
 
 #define STEP_1 wait_4_steps.step()
 
-#ifdef MULTIPLE_TARGETS
+#ifdef MULTIPLE_TRAGETS
 void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, unsigned int signal){
 
     wait_4_steps.set_steps(4);
@@ -111,7 +111,6 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
 
     switch (target){
     case 1: // Lutkovno Gledalsce
-
         if(signal > SIGNAL_THRES){
             lcd_distance_target1(lcd, distance);
         }
@@ -120,9 +119,7 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
         }
         break;
 
-
     case 2: // Vhod na grad
-
         if(wait_4_steps.step() == 1){
             lcd.setCursor(0, 0);
             lcd.print(F("A dragon you")); lcd.setCursor(0,1);
@@ -148,54 +145,72 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
         }
         break;
 
-    case 3: // Cerkev sv. Florjana
-
-            if(signal > SIGNAL_THRES){
-                lcd_distance_target1(lcd, distance);
-            }
-            else {
-                lcd_gps_signal(lcd, signal);
-            }
+    case 3: // Grajska kapela
+        if(signal > SIGNAL_THRES){
+            lcd_distance_target1(lcd, distance);
+        }
+        else {
+            lcd_gps_signal(lcd, signal);
+        }
 
         break;
 
-    case 4: // Kip
+    case 4: // Cerkev sv. Florjana
+        if(signal > SIGNAL_THRES){
+            lcd_distance_target1(lcd, distance);
+        }
+        else {
+            lcd_gps_signal(lcd, signal);
+        }
+
+        break;
+
+    case 5: // Kip
         if(wait_4_steps.step() == 1){
-             lcd.setCursor(0, 0);
-             lcd.print(F("A house by the")); lcd.setCursor(0,1);
-             lcd.print(F("church you"));
-         }
-         if(wait_4_steps.step() == 2 ){
-             lcd.setCursor(0, 0);
-             lcd.print(F("should mind,")); lcd.setCursor(0,1);
-             lcd.print(F("A statue with"));
-         }
-         if(wait_4_steps.step() == 3 ){
-             lcd.setCursor(0, 0);
-             lcd.print(F("a dragon there")); lcd.setCursor(0,1);
-             lcd.print(F("you will find."));
-         }
-         if(wait_4_steps.step() == 4 ){
-             if(signal > SIGNAL_THRES){
-                 lcd_distance_target1(lcd, distance);
-             }
-             else {
-                 lcd_gps_signal(lcd, signal);
-             }
-         }
-         break;
-
-    case 5: // Trg FR
-
+            lcd.setCursor(0, 0);
+            lcd.print(F("A house by the")); lcd.setCursor(0,1);
+            lcd.print(F("church you"));
+        }
+        if(wait_4_steps.step() == 2 ){
+            lcd.setCursor(0, 0);
+            lcd.print(F("should mind,")); lcd.setCursor(0,1);
+            lcd.print(F("A statue with"));
+        }
+        if(wait_4_steps.step() == 3 ){
+            lcd.setCursor(0, 0);
+            lcd.print(F("a dragon there")); lcd.setCursor(0,1);
+            lcd.print(F("you will find."));
+        }
+        if(wait_4_steps.step() == 4 ){
             if(signal > SIGNAL_THRES){
                 lcd_distance_target1(lcd, distance);
             }
             else {
                 lcd_gps_signal(lcd, signal);
             }
-            break;
+        }
+        break;
 
-    case 6: // Napoleonov kip
+    case 6: // Krakovski most
+        if(signal > SIGNAL_THRES){
+            lcd_distance_target1(lcd, distance);
+        }
+        else {
+            lcd_gps_signal(lcd, signal);
+        }
+
+        break;
+
+    case 7: // Trg FR
+        if(signal > SIGNAL_THRES){
+            lcd_distance_target1(lcd, distance);
+        }
+        else {
+            lcd_gps_signal(lcd, signal);
+        }
+        break;
+
+    case 8: // Napoleonov kip
         switch (wait_3_steps.step()) {
         case 1:
             lcd.setCursor(0, 0);
@@ -217,17 +232,7 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
             break;
         }
         break;
-    case 7: // Zlata ladjica
-
-            if(signal > SIGNAL_THRES){
-                lcd_distance_target1(lcd, distance);
-            }
-            else {
-                lcd_gps_signal(lcd, signal);
-            }
-            break;
-
-    case 8: // Sustarski most
+    case 9: // Zlata ladjica
         switch (wait_3_steps.step()){
         case 1:
             lcd.setCursor(0, 0);
@@ -250,7 +255,7 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
         }
         break;
 
-    case 9: // Presernov trg
+    case 10: // Sustarski most
         if(signal > SIGNAL_THRES){
             lcd_distance_target1(lcd, distance);
         }
@@ -259,33 +264,42 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
         }
         break;
 
-    case 10: // Rotovz
+    case 11: // Presernov trg
+        if(signal > SIGNAL_THRES){
+            lcd_distance_target1(lcd, distance);
+        }
+        else {
+            lcd_gps_signal(lcd, signal);
+        }
+        break;
+
+    case 12: // Rotovz
         if(wait_4_steps.step() == 1){
-             lcd.setCursor(0, 0);
-             lcd.print(F("To the fountain")); lcd.setCursor(0,1);
-             lcd.print(F("you must go"));
-         }
-         if(wait_4_steps.step() == 2 ){
-             lcd.setCursor(0, 0);
-             lcd.print(F("from witch")); lcd.setCursor(0,1);
-             lcd.print(F("three rivers"));
-         }
-         if(wait_4_steps.step() == 3 ){
-             lcd.setCursor(0, 0);
-             lcd.print(F("flow      ")); lcd.setCursor(0,1);
-             lcd.print(F("               "));
-         }
-         if(wait_4_steps.step() == 4 ){
-             if(signal > SIGNAL_THRES){
-                 lcd_distance_target1(lcd, distance);
-             }
-             else {
-                 lcd_gps_signal(lcd, signal);
-             }
-         }
-         break;
+            lcd.setCursor(0, 0);
+            lcd.print(F("To the fountain")); lcd.setCursor(0,1);
+            lcd.print(F("you must go"));
+        }
+        if(wait_4_steps.step() == 2 ){
+            lcd.setCursor(0, 0);
+            lcd.print(F("from witch")); lcd.setCursor(0,1);
+            lcd.print(F("three rivers"));
+        }
+        if(wait_4_steps.step() == 3 ){
+            lcd.setCursor(0, 0);
+            lcd.print(F("flow      ")); lcd.setCursor(0,1);
+            lcd.print(F("               "));
+        }
+        if(wait_4_steps.step() == 4 ){
+            if(signal > SIGNAL_THRES){
+                lcd_distance_target1(lcd, distance);
+            }
+            else {
+                lcd_gps_signal(lcd, signal);
+            }
+        }
+        break;
 
-    case 11: // Stolnica
+    case 13: // Stolnica
         if(signal > SIGNAL_THRES){
             lcd_distance_target1(lcd, distance);
         }
@@ -294,29 +308,29 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
         }
         break;
 
-    case 12: // Zmajski most
+    case 14: // Zmajski most
         if(wait_3_steps.step() ==1){
-             lcd.setCursor(0, 0);
-             lcd.print(F("Dragon bridge")); lcd.setCursor(0,1);
-             lcd.print(F("is near, if you"));
-         }
-         if(wait_3_steps.step() == 2 ){
-             lcd.setCursor(0, 0);
-             lcd.print(F("dont't find it")); lcd.setCursor(0,1);
-             lcd.print(F("ask, do not fear."));
-         }
+            lcd.setCursor(0, 0);
+            lcd.print(F("Dragon bridge")); lcd.setCursor(0,1);
+            lcd.print(F("is near, if you"));
+        }
+        if(wait_3_steps.step() == 2 ){
+            lcd.setCursor(0, 0);
+            lcd.print(F("dont't find it")); lcd.setCursor(0,1);
+            lcd.print(F("ask, do not fear."));
+        }
 
-         if(wait_3_steps.step() == 3 ){
-             if(signal > SIGNAL_THRES){
-                 lcd_distance_target1(lcd, distance);
-             }
-             else {
-                 lcd_gps_signal(lcd, signal);
-             }
-         }
-         break;
+        if(wait_3_steps.step() == 3 ){
+            if(signal > SIGNAL_THRES){
+                lcd_distance_target1(lcd, distance);
+            }
+            else {
+                lcd_gps_signal(lcd, signal);
+            }
+        }
+        break;
 
-    case 13: // Mesaaski most
+    case 15: // Mesarski most
         if(signal > SIGNAL_THRES){
             lcd_distance_target1(lcd, distance);
         }
@@ -325,7 +339,7 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
         }
         break;
 
-    case 14: // Petkovsek 1
+    case 16: // Petkovsek
         switch (step4){
         case 1:
             lcd.setCursor(0, 0);
@@ -352,32 +366,27 @@ void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, uns
             break;
         }
         break;
-
-    case 15: // Petkovsek 2
-        if(signal > SIGNAL_THRES){
-            lcd_distance_target1(lcd, distance);
-        }
-        else {
-            lcd_gps_signal(lcd, signal);
-        }
-        break;
     }
 }
 
 #else
 void lcd_target(LiquidCrystal_I2C lcd, unsigned int target, double distance, unsigned int signal){
 
-    static unsigned int wait_temp;
-    if (wait_temp != wait_4_steps.step()) {
+    static int _lcd_clr, _lcd_clear_tmp;
+
+    // Clear lcd on change
+    if (_lcd_clr != _lcd_clear_tmp) {
         lcd.clear();
-        wait_temp = wait_4_steps.step();
+        _lcd_clear_tmp = _lcd_clr;
     }
 
     if(signal > SIGNAL_THRES){
         lcd_distance_target1(lcd, distance);
+        _lcd_clr = 1;
     }
     else {
         lcd_gps_signal(lcd, signal);
+        _lcd_clr = 2;
     }
 
 }

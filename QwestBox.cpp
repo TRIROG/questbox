@@ -15,7 +15,7 @@
 
 TinyGPSPlus gps;
 //LiquidCrystal lcd(8, 10, 4, 5, 6, 7);
-LiquidCrystal_I2C lcd(0x3F,16,2);
+LiquidCrystal_I2C lcd(0x3F,16,2); // First box is 0x27, others 0x3F
 SoftwareSerial ss(4, 5);
 
 //Servo servo;
@@ -23,7 +23,7 @@ PWMServo servo;
 
 void secret_button();
 int distance2();
-void open_box();
+void open_box(bool close);
 void close_box();
 void go_sleep(void);
 int distance2(double lat1, double lon1, double lat2, double lon2, unsigned long *dist);
@@ -93,21 +93,25 @@ void setup()
     target_lon[13] = TARGET_13_LON;
     target_lat[14] = TARGET_14_LAT;
     target_lon[14] = TARGET_14_LON;
+    target_lat[15] = TARGET_15_LAT;
+    target_lon[15] = TARGET_15_LON;
+    target_lat[16] = TARGET_16_LAT;
+    target_lon[16] = TARGET_16_LON;
 
     ss.begin(9600);
-    Serial.begin(115200);
+    Serial.begin(57600);
 
-#ifndef MULTIPLE_TARGETS
+#ifndef MULTIPLE_TRAGETS
     EEPROM.get(EEPROM_INDEX_LAT, single_target_lat);
     EEPROM.get(EEPROM_INDEX_LON, single_target_lon);
     EEPROM.get(EEPROM_INDEX_RAD, radius);
-    Serial.print(F("EEPROM LAT: ")); Serial.println(single_target_lat);
-    Serial.print(F("EEPROM LON: ")); Serial.println(single_target_lon);
-    Serial.print(F("EEPROM RAD: ")); Serial.println(radius);
+    Serial.print(F("Lattitude: ")); Serial.println(single_target_lat, 6);
+    Serial.print(F("Longiude: ")); Serial.println(single_target_lon, 6);
+    Serial.print(F("Radius: ")); Serial.println(radius);
 #endif
 
     target = EEPROM.read(EEPROM_TARGET_INDEX);
-    if(target > NUMBER_OF_TARGETS+2 || target == 0 /*|| TARGET_RESET > 0*/) {
+    if((target > NUMBER_OF_TARGETS+2 || target == 0 ) && target != 255/*|| TARGET_RESET > 0*/) {
         target = 1;
         EEPROM.write(EEPROM_TARGET_INDEX, target);
     }
@@ -163,7 +167,20 @@ void loop()
         Serial.println(F("Button pressed"));
         secret_button();
     }
+#ifdef MULTIPLE_TARGETS
+    if (target == 255) {
+        lcd.clear();
+        lcd.print("Please return");
+        lcd.setCursor(0,1);
+        lcd.print("the box.");
 
+        unsigned long ts = millis();
+        while (ts + 60000 > millis()) {
+            secret_button();
+        }
+    }
+#endif
+    // Check GPS
     bool GPS_debug = 0;
     unsigned long t = millis();
     while (ss.available() > 0 || t + 1100 < millis()){
@@ -175,15 +192,14 @@ void loop()
         GPS_debug = 0;
     }
 
-
     sats_fix = gps.satellites.value();
     hdop = gps.hdop.value();
     position_lat = gps.location.lat();
     position_lon = gps.location.lng();
 
     //target = 3; // debug
-#ifdef MULTIPLE_TARGETS
-    distance = gps.distanceBetween(position_lat, position_lon, target_lat[target], target_lon[target]);
+#ifdef MULTIPLE_TRAGETS
+        distance = gps.distanceBetween(position_lat, position_lon, target_lat[target], target_lon[target]);
 #else
     distance = gps.distanceBetween(position_lat, position_lon, single_target_lat, single_target_lon);
 #endif
@@ -203,7 +219,12 @@ void loop()
 
     if (distance > 30 && sim == 0){
 #else
+#ifdef MULTIPLE_TRAGETS
+    Serial.print(F("Distance: ")); Serial.println(distance);
     if (distance > 30) {
+#else
+    if (distance > radius) {
+#endif
 #endif
         lcd_target(lcd, target, distance, sats_fix);
     }
@@ -245,17 +266,32 @@ void loop()
         delay(5000);
         but = 0;
 #endif
+#ifdef MULTIPLE_TRAGETS
         // Open the box at the end of game
         if(target > NUMBER_OF_TARGETS){
             lcd.clear();
             lcd.setCursor(0, 0);
-            lcd.print(F("CONRATULATIONS! "));
+            lcd.print(F("CONGRATULATIONS! "));
+            EEPROM.write(EEPROM_TARGET_INDEX, 255);
             delay(5000);
-            open_box();
+            open_box(DONT_LOCK);
         }
         else {
-            EEPROM.write(EEPROM_TARGET_INDEX, target);
+            static unsigned int target_temp;
+            if(target_temp != target){
+                EEPROM.write(EEPROM_TARGET_INDEX, target);
+                target_temp = target;
+            }
         }
+#else
+        if (distance < radius) {
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print(F("CONGRATULATIONS! "));
+            delay(5000);
+            open_box(0);
+        }
+#endif
 
     }
 
@@ -289,7 +325,7 @@ void serial_receive(){
 
     char _inByte;
     String _data;
-    float _lat, _lon;
+    double _lat, _lon;
     int _hash_count = 0;
     short _radius;
 
@@ -321,7 +357,8 @@ void serial_receive(){
                 }
 
                 _lat = _data.toFloat();
-                Serial.print(F("Received lat: ")); Serial.println(_lat, 6);
+                Serial.print(F("Received lat: ")); Serial.println(_data);
+                //Serial.print(F("Received lat: ")); Serial.println(_lat, 6);
 
                 _data = "";
                 _inByte = Serial.read();
@@ -341,7 +378,8 @@ void serial_receive(){
                 }
 
                 _lon = _data.toFloat();
-                Serial.print(F("Received lon: ")); Serial.println(_lon, 6);
+                Serial.print(F("Received lon: ")); Serial.println(_data);
+                //Serial.print(F("Received lon: ")); Serial.println(_lon, 6);
 
                 _data = "";
                 _inByte = Serial.read();
@@ -361,7 +399,7 @@ void serial_receive(){
                 }
                 _radius = _data.toInt();
 
-                Serial.print(F("Received radius: ")); Serial.println(radius);
+                Serial.print(F("Received radius: ")); Serial.println(_radius);
 
                 if (_inByte == '$'){
                     Serial.println(F("Received OK"));
@@ -416,7 +454,7 @@ int step1()
     else return 0;
 }
 
-void open_box(){
+void open_box(bool lock){
     lcd_open_box(lcd);
     delay(4000);
     lcd_box_open(lcd);
@@ -424,7 +462,17 @@ void open_box(){
     servo.write(DOOR_OPEN);
     delay(5000);
     //servo.detach();
-    digitalWrite(SERVO_ON_PIN, 0);
+    if (lock) {
+        digitalWrite(SERVO_ON_PIN, 0);
+    }
+    else {
+        unsigned long ts = millis();
+        while (ts + 60000 > millis()) {
+            secret_button();
+        }
+        go_sleep();
+    }
+
 
 }
 
@@ -512,7 +560,7 @@ void secret_button()
                                                 break;
                                             }
                                             else {
-                                                open_box();
+                                                open_box(1);
                                                 delay(15000);
                                                 close_box();
                                                 break;
