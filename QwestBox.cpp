@@ -22,7 +22,6 @@ SoftwareSerial ss(4, 5);
 PWMServo servo;
 
 void secret_button();
-int distance2();
 void open_box(bool close);
 void close_box();
 void go_sleep(void);
@@ -298,22 +297,29 @@ void loop()
     if(millis() > update_time + 1000){
         update_time = millis();
 #ifdef DEBUG
-        Serial.println(gps.location.lat(), 6);
         Serial.print(F("LAT="));  Serial.println(gps.location.lat(), 6);
         Serial.print(F("LONG=")); Serial.println(gps.location.lng(), 6);
         Serial.print(F("ALT="));  Serial.println(gps.altitude.meters());
         Serial.print(F("hdop="));  Serial.println(hdop);
         Serial.print(F("sats="));  Serial.println(sats_fix);
 #endif
-        if(hdop < 500 && sats_fix > 4){
+        if(hdop < 500 && sats_fix > 4 && distance < 1000000){
             fix = 1;
-            distance = gps.distanceBetween(position_lat, position_lon, TARGET_1_LAT, TARGET_1_LON);
+        }
+        else if (hdop < 500 && sats_fix > 4) {
+            Serial.println(F("Bad measure. GPS dump:"));
+            Serial.print(F("LAT="));  Serial.println(gps.location.lat(), 6);
+            Serial.print(F("LONG=")); Serial.println(gps.location.lng(), 6);
+            Serial.print(F("ALT="));  Serial.println(gps.altitude.meters());
+            Serial.print(F("hdop="));  Serial.println(gps.hdop.value());
+            Serial.print(F("sats="));  Serial.println(gps.satellites.value());
         }
         else{
             fix = 0;
             strength = sats_fix;
             //lcd_gps_signal(lcd, strength);
-        }
+        } 
+        //Serial.print(F("Distance: ")); Serial.println(distance);
     }
 
     if(millis() > sleep_time + SLEEP_TIME_MS){
@@ -411,18 +417,18 @@ void serial_receive(){
                     EEPROM.put(EEPROM_INDEX_RAD, radius);
                 }
                 else {
-                    Serial.print(F("Unrecognised char4: ")); Serial.println(_inByte);
+                    Serial.print(F("Unrecognised char 4: ")); Serial.println(_inByte);
+                    break;
                 }
             }
             else {
-                Serial.println(F("Error: not less the 3 #'s"));
+                Serial.println(F("Error: #'s"));
+                break;
             }
         } else {
-            Serial.print(F("Unrecognised char3: ")); Serial.println(_inByte);
+            Serial.print(F("Unrecognised char 3: ")); Serial.println(_inByte);
+            break;
         }
-
-
-
     }
 }
 
