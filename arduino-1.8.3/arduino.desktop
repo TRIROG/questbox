@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=
+Name=arduino
+Comment=
+Exec=/home/vid/Programs/arduino-1.8.3/arduino
+Icon=/home/vid/Programs/arduino-1.8.3/icon.png
+Terminal=false
+Type=Application
+Categories=Utility;Application;

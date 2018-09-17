@@ -1,6 +1,6 @@
 ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
-ARDUINO_DIR  = /home/vid/Programs/arduino-1.6.5
+ARDUINO_DIR  = arduino-1.8.3
 
 TARGET       = QwestBox
 ARDUINO_LIBS = LiquidCrystal_I2C Wire EEPROM NMEA TinyGPSPlus SoftwareSerial Servo PWMServo
@@ -10,7 +10,8 @@ MCU = atmega328p
 
 ARDUINO_PORT = /dev/ttyUSB0
 
-ARDMK_DIR = /home/vid/Arduino/Arduino-Makefile-master
+ARDMK_DIR = Arduino-Makefile
+USER_LIB_PATH = libs
 
 #AVRDUDE_ARD_BAUDRATE = 57600
 
